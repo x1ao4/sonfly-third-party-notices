@@ -1,0 +1,17 @@
+SPDX 标准许可证参考文本：ISC License（SPDX License Identifier: ISC）
+
+重要说明：本文件仅为 SPDX 标准许可证参考文本，不是本目录中任何具体软件包版本随包发布或从其归档提取的原始 LICENSE 文件。本文件不提供任何具体软件包的版权声明、权利人或年份；不得依据 package.json 的 author 字段填充下方占位符。该参考文本不证明对应软件包的授权充分，也不替代法律意见。
+
+来源：SPDX 官方 ISC 页面 https://spdx.org/licenses/ISC.html
+原始文本来源：https://raw.githubusercontent.com/spdx/license-list-data/main/text/ISC.txt
+检索日期：2026-10-17
+
+--- SPDX 标准文本开始 ---
+ISC License
+
+Copyright <year> <owner>
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+--- SPDX 标准文本结束 ---

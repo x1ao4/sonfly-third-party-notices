@@ -1,0 +1,13 @@
+unblockneteasemusic-server-0.28.0.tgz —— 来源与校验
+
+包：@unblockneteasemusic/server@0.28.0（上游项目 UnblockNeteaseMusic，npm 发布产物）
+下载源：https://registry.npmmirror.com/@unblockneteasemusic/server/-/server-0.28.0.tgz
+        （npm 官方 registry 同内容；以 registry integrity 校验）
+SHA256: 5c1533667748416bacc7c92c8c0d533d19f275b5b440ad610d3a3e6edec6b795
+SHA512(base64, npm integrity): FLXNEMc9ItoAhhhemxKJzpJ+9DkWsfnxE5PYTCIzqZarYVUCxeKKEf0CwGeUeIW35z1Ekl0wFU4l10RDWVCr4A==
+    ↑ 与 Sonfly 仓库 backend/vendor/ncm-api/package-lock.json 中该包的 integrity 记录逐字符一致
+内容：88 个文件 —— 完整可读 JavaScript 源码（src/ 50 个文件）+ precompiled/ + Dockerfile 等；
+      许可文件 COPYING（GPL-3.0 全文）与 COPYING.LESSER（LGPL-3.0）
+    ↑ 与 Sonfly 发行镜像内 backend/vendor/ncm-api/node_modules/@unblockneteasemusic/server/ 逐字节一致
+许可：LGPL-3.0-only（随包 package.json 与 npm registry 双源核实）
+获取日期：2026-10-13

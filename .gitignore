@@ -1,0 +1,8 @@
+# macOS 元数据
+.DS_Store
+._*
+
+# 编辑器 / IDE
+.idea/
+.vscode/
+*.swp
