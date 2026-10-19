@@ -1,7 +1,11 @@
 85d4b683707e654fad87613e1bf6134d289d8ce5bc408fd31145d6ca51d9098e  ./.gitignore
-be48b44746f3b31cf6dfb0f8ee3089b4c6ead13f239c26391621e283cf2aa8d2  ./build/build-ffmpeg-lgpl.sh
+3a024993a16100652dd20ed13d70df7b291df956923b13eafee19811561951aa  ./build/arm64-equivalence-2026-10-19.txt
+79e0011520aa139d43e8b0649acbf4c5be9a596c86b414135d1847649604a7ab  ./build/build-ffmpeg-lgpl.sh
 440f7e23113f0b159b282ecc21be4bcb4a9ecfe438a2ed5e99c91a1603bf65d0  ./build/full-build-log-2026-10-12.txt
+0a17a61d758fa64bb001fd6ee414633a93fda9be40e23b805a48ca376e50e382  ./build/full-build-log-2026-10-19-arm64.txt
+2901c92f842dfe88e66d45702a2d319c73b86578daa289f7f83eb0278c1239db  ./build/product-info-arm64.txt
 0d4dfd551814a27e03639345d4a9ab6cfd30b27d8a3319bfa5d81efc20c154da  ./build/product-info.txt
+91e723308d8464bfdbc429f12046d780bcac92463a09c0348bb2d5ce53f8503f  ./build/toolchain-arm64.txt
 26ccb2d3df185abde4887f35e14ee395b1f6866b795da332879848fd2fbbc049  ./build/toolchain.txt
 0dd4e47333485760cf8c265db5a5e24ae8d7401064c6f2e19793ee81a5bef42f  ./licenses/cookie-signature-1.2.2-LICENSE
 b634ab5640e258563c536e658cad87080553df6f34f62269a21d554844e58bfe  ./licenses/FFmpeg-COPYING.LGPLv2.1
@@ -20,9 +24,9 @@ c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4  ./licenses/ope
 c28c45e3032163e9184b0ed269fdc60ddf5607f44deb85e854f91c5e438090fe  ./licenses/SPDX-MIT-REFERENCE.txt
 3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986  ./licenses/UnblockNeteaseMusic-COPYING-GPL-3.0
 da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768  ./licenses/UnblockNeteaseMusic-COPYING.LESSER-LGPL-3.0
-af8e41eaca53632423823cc848e15bd69e8d35cb3f5fd47f7a75b83b70ce7c8f  ./notices/THIRD-PARTY-NOTICES.md
-5113331a361ddedeae04b6f35976ca86a861937518cf46f02b146eedcc8c2b9a  ./README.md
-a6a2371eefde3db9f149b424c75943d7101408eb170f4aec5dab7660afc81a33  ./RELINKING.md
+dc9d426d66423232246732038d6561ffcd506ca2b5586b1493e4e1f9ddc0f81c  ./notices/THIRD-PARTY-NOTICES.md
+6a6e8a271833116a8e2a7b568e8f9ef7cc644bfb4eaa49ddca36553dfddb03ab  ./README.md
+ca347005f8cbd42a61a9562787e6d01618c698b278cd3f6e1d5c30275460ccd7  ./RELINKING.md
 834df2c4129f597b0fa58fe9b60bfab0a6311a3d979c171872f1f01cc33689b5  ./SBOM.md
 8646515b638a3ad303e23af6a3587734447cb8fc0a0c064ecdb8e95c4fd8b389  ./sources/ffmpeg-7.0.2.tar.xz
 dddf7541a682f661b121096ebd0e9080b04afe7057ea50113479a02c13ca062c  ./sources/ffmpeg-7.0.2.tar.xz.asc
@@ -34,4 +38,4 @@ d9030116fd03e4acfa0b665a13a5de46110296b4e30bb8e67be1f08af29f6306  ./sources/musl
 fc381f6b8afcd7baa2aff59d2604bbac4b764eae2640a7077d90b6d4c9048a3a  ./sources/SHA256SUMS
 1abad5a4645f2b4ece825d98b3ce0b91712892e9c7d40fe88d2e67e9fdc469ff  ./sources/unblockneteasemusic-server-0.28.0.provenance.txt
 5c1533667748416bacc7c92c8c0d533d19f275b5b440ad610d3a3e6edec6b795  ./sources/unblockneteasemusic-server-0.28.0.tgz
-b3697b0b0b5d40460eb2dfa2292b0b3f42304f05a1c456d5d29cac21bbf46699  ./verify/product-sha256.txt
+9b8ea047c76937761352c1dc23ae6433117cfc0ff2fccaf0f98f942f5418a72d  ./verify/product-sha256.txt

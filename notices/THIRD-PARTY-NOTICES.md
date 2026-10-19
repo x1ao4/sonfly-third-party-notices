@@ -14,12 +14,14 @@
 - 官方源码：`https://ffmpeg.org/releases/ffmpeg-7.0.2.tar.xz`
   - SHA256 `8646515b638a3ad303e23af6a3587734447cb8fc0a0c064ecdb8e95c4fd8b389`
   - 上游 GPG 签名 `ffmpeg-7.0.2.tar.xz.asc` 由 FFmpeg release signing key `<ffmpeg-devel@ffmpeg.org>` 签发；该密钥指纹为 `FCF986EA15E6E293A5644F10B4322F04D67658D8`（与 ffmpeg.org 下载页公布的指纹一致），公钥见公开发布的材料仓库 `sources/keys/`。
-- 构建方式：**从上游源码自行构建**（非第三方预编译包）。构建脚本与构建材料随公开发布的材料仓库提供；脚本对源码与产物均做 SHA256 fail-closed 校验。
-  - 构建基础镜像：`alpine:3.22` @ `sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8`（多阶段构建的 `ffmpeg-build` 阶段；编译工具链不进入最终镜像）。
-  - configure 参数（完整）：`--prefix=/build/out --disable-debug --disable-doc --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --disable-indev=v4l2 --disable-outdev=v4l2 --disable-indev=fbdev --disable-outdev=fbdev --enable-libmp3lame --disable-shared --enable-static --extra-cflags=-I/build/lame/include --extra-ldflags='-static -L/build/lame/lib' --cc=gcc`
-  - 构建工具链：gcc 14.2.0-r6 / binutils 2.44-r3 / make 4.4.1-r3 / nasm 2.16.03-r0 / musl 1.2.5-r12 / pkgconf 2.4.3-r0 / linux-headers 6.14.2-r0。
+- 构建方式：**从上游源码自行构建**（非第三方预编译包）。构建脚本与构建材料随公开发布的材料仓库提供；脚本对源码与产物均做**按架构**的 SHA256 fail-closed 校验。
+  - 构建基础镜像：`alpine:3.22` @ `sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8`（多阶段构建的 `ffmpeg-build` 阶段；该 digest 为**多架构 index**，`linux/amd64` 与 `linux/arm64` 各自取对应变体；编译工具链不进入最终镜像）。
+  - configure 参数（完整，两个架构一致）：`--prefix=/build/out --disable-debug --disable-doc --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --disable-indev=v4l2 --disable-outdev=v4l2 --disable-indev=fbdev --disable-outdev=fbdev --enable-libmp3lame --disable-shared --enable-static --extra-cflags=-I/build/lame/include --extra-ldflags='-static -L/build/lame/lib' --cc=gcc`
+  - 构建工具链（两个架构一致）：gcc 14.2.0-r6 / binutils 2.44-r3 / make 4.4.1-r3 / nasm 2.16.03-r0 / musl 1.2.5-r12 / pkgconf 2.4.3-r0 / linux-headers 6.14.2-r0。`nasm` 仅参与 amd64 的 x86 汇编优化；arm64 上 FFmpeg 使用内联汇编，不调用 nasm。
   - **未启用** `--enable-gpl` / `--enable-version3` / `--enable-nonfree`；二进制内无任何 GPL 组件（构建脚本在构建时对配置与组件列表做 fail-closed 强校验）。
-- 本镜像使用的产物：23,493,032 字节，SHA256 `7e58a04d102ee638ae7d5e282b29e1a934baee13ce4655496113a3019f1441d5`。
+- 本镜像使用的产物（**按目标架构**）：
+  - `linux/amd64`：23,493,032 字节，SHA256 `7e58a04d102ee638ae7d5e282b29e1a934baee13ce4655496113a3019f1441d5`。
+  - `linux/arm64`：19,733,736 字节，SHA256 `1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d`。
 - 许可全文：`licenses/FFmpeg-COPYING.LGPLv2.1`、`licenses/FFmpeg-LICENSE.md`。〔法定〕
 - 对应源码：FFmpeg 官方源码 tarball（SHA256 已固定）+ 构建脚本 + 构建工具链记录，随公开发布的材料仓库提供。〔法定〕
 - **静态链接说明**：该二进制内静态链入了以下两个库；Sonfly 自身代码**未被链接**进该二进制（Sonfly 以独立子进程方式调用 ffmpeg 命令行程序）：
@@ -38,7 +40,7 @@
 - 构建方式：**上游源码直接构建，不含任何发行版补丁**（`./configure --disable-shared --enable-static --disable-frontend --disable-decoder`）。
   - `--disable-decoder`：LAME 内置 mpglib 解码引擎不编译、不进入任何分发产物——Sonfly 仅使用 LAME 编码 API。产物内不含 mpglib 对象与 `hip_*` / `lame_decode` 符号。
   - 编译标志：`CFLAGS="-O2 -fomit-frame-pointer"`。
-  - 中间产物：`libmp3lame.a` SHA256 `c7552887925b83624b669ee588c15173a1fc7ec656850952e3be059f89ef9d68`。
+  - 中间产物 `libmp3lame.a`（**按目标架构**）：`linux/amd64` 383,622 字节、SHA256 `c7552887925b83624b669ee588c15173a1fc7ec656850952e3be059f89ef9d68`；`linux/arm64` 350,768 字节、SHA256 `dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e`。
 - 许可全文：`licenses/LAME-COPYING-LGPL-2.0`、`licenses/LAME-LICENSE`。〔法定〕
 - 项目请求的承认声明〔保守，LAME 项目在其随包 LICENSE 文件中的请求〕：本软件使用 LAME 编码器；LAME 项目地址 <https://lame.sourceforge.io/>（原 www.mp3dev.org）。未对 LAME 源码做任何修改。
 - 版权声明〔保守·LGPL-2.0 §6「运行显示版权声明」条款之文本缓解〕：libmp3lame 各源文件头载有逐作者版权行（如 `Copyright (c) 1999-2000 Mark Taylor`、`(c) 2000-2017 Robert Hegemann`、`(c) 2000-2005 Takehiro Tominaga` 等，完整列表见对应源码）。镜像内 ffmpeg 运行时输出不展示上述版权行（LAME 无运行时输出），故于本文档中补足。

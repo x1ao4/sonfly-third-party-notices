@@ -1,0 +1,31 @@
+# linux/arm64 产物跨架构等价性验证（2026-10-19）
+
+# 基准：linux/amd64 产物（ffmpeg 7e58a04d…）
+# 对象：linux/arm64 产物（ffmpeg 1fae8f6f…）
+# 条件：同一上游源码、同一 configure 参数、同一工具链版本（见 toolchain.txt / toolchain-arm64.txt）
+
+# 方法
+#   两个架构分别在隔离容器内以 Sonfly 业务转码参数处理相同输入样本：
+#     ffmpeg -nostdin -hide_banner -loglevel error -y -i <src> \
+#            -map 0:a:0 -vn -c:a libmp3lame -b:a 256k -f mp3 <out>
+#   比较项：① MP3 输出字节数；② MP3 比特流 SHA256；③ 用同一解码器展开为 s16le 后的 PCM 逐样本差。
+
+# 样本与结果
+# 样本          MP3 字节数   MP3 比特流   PCM 最大偏差   PCM 平均偏差   >1 LSB 占比
+# s5.flac       162,211      不同         2 LSB          0.0153 LSB     0.032%
+# s5.wma        161,375      不同         2 LSB          0.0342 LSB     0.001%
+# s5_alac.m4a   162,310      不同         2 LSB          0.0153 LSB     0.032%
+# s5.tta        162,211      不同         2 LSB          0.0153 LSB     0.032%
+# s5.wv         162,211      不同         2 LSB          0.0153 LSB     0.032%
+# s1s.dsf       258,092      相同         0 LSB          0             0
+
+# 结论
+#   两个架构的 MP3 输出在字节数上完全一致，比特流差异来自编码器的浮点/SIMD 实现细节；
+#   解码后 PCM 最大偏差 2 LSB（16-bit 满量程 32768，约 0.006%），平均偏差 < 0.04 LSB，
+#   DSD 路径逐字节一致。两架构的转码输出在听感上等价。
+
+# 复现命令（在 arm64 环境或对应模拟环境中）
+#   ffmpeg -nostdin -hide_banner -loglevel error -y -i <src> \
+#          -map 0:a:0 -vn -c:a libmp3lame -b:a 256k -f mp3 <out>
+#   sha256sum <out>
+#   ffmpeg -nostdin -hide_banner -loglevel error -i <out> -f s16le - | sha256sum

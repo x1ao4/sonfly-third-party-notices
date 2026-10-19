@@ -1,11 +1,18 @@
-# 产物参考哈希（Sonfly 发行镜像所用二进制）
+# 产物参考哈希（Sonfly 发行镜像所用二进制，按目标架构）
 # 构建配置：LAME 以 --disable-decoder 构建（不含其内置 mpglib 解码引擎）
-# 采集时间：2026-10-12
-# 来源：与 Dockerfile ffmpeg-build 阶段同构的构建（双跑逐字节一致）
+# 采集时间：linux/amd64 2026-10-12 / linux/arm64 2026-10-19
+# 来源：与 Dockerfile ffmpeg-build 阶段使用相同源码、configure 参数与工具链版本构建
 
+# ---- linux/amd64 ----
 7e58a04d102ee638ae7d5e282b29e1a934baee13ce4655496113a3019f1441d5  ffmpeg
 c7552887925b83624b669ee588c15173a1fc7ec656850952e3be059f89ef9d68  libmp3lame.a
 
+# ---- linux/arm64 ----
+1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d  ffmpeg
+dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e  libmp3lame.a
+
 # 文件大小
-23493032 bytes  ffmpeg
-383622 bytes  libmp3lame.a
+23493032 bytes  ffmpeg        (linux/amd64)
+383622 bytes    libmp3lame.a  (linux/amd64)
+19733736 bytes  ffmpeg        (linux/arm64)
+350768 bytes    libmp3lame.a  (linux/arm64)

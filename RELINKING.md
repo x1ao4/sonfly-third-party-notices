@@ -40,11 +40,16 @@ sh build-ffmpeg-lgpl.sh          # 脚本会自行下载源码（含 SHA256 强�
 # 产物：/build/out/bin/ffmpeg
 ```
 
-脚本内包含对参考产物的 SHA256 fail-closed 校验（供应链完整性用途）；在相同基础镜像与工具链版本下，产物应为：
+脚本内包含对参考产物的 SHA256 fail-closed 校验（供应链完整性用途，**按目标架构**选取参考值）；在相同基础镜像与工具链版本下，产物应为：
 
 ```
+# linux/amd64
 7e58a04d102ee638ae7d5e282b29e1a934baee13ce4655496113a3019f1441d5  ffmpeg
 c7552887925b83624b669ee588c15173a1fc7ec656850952e3be059f89ef9d68  libmp3lame.a
+
+# linux/arm64
+1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d  ffmpeg
+dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e  libmp3lame.a
 ```
 
 ## 4. 手动重建（使用本仓库源码归档；不需访问上游网络）
@@ -81,7 +86,7 @@ cd /build/ffmpeg-7.0.2
 make -j"$(nproc)" && make install
 
 # 4.5 校验（未修改任何源码、工具链一致时）
-sha256sum /build/out/bin/ffmpeg    # 应为 7e58a04d…
+sha256sum /build/out/bin/ffmpeg    # amd64 应为 7e58a04d…；arm64 应为 1fae8f6f…
 ```
 
 ## 5. 构建「修改过的库」并重新链接（LGPL 授予你的权利）
@@ -101,8 +106,8 @@ LGPL 第 6 节 (a) 的目的即让接收者能够修改库并重新链接。你�
 ## 6. 验证方法与常见问题
 
 - **验证参考产物**：`sha256sum ffmpeg` 对照 §3 中的参考值；`./ffmpeg -buildconf` 可查看完整构建参数（应无 `--enable-gpl` / `--enable-version3` / `--enable-nonfree`）。
-- **验证运行**：该二进制为完全静态链接（`ldd` 显示 not a dynamic executable），可在任意 x86-64 Linux（glibc 或 musl 环境）直接运行。
-- **哈希不一致？** 若你未修改源码但哈希与 §3 不同，通常是工具链版本差异（Alpine 仓库滚动更新；Sonfly 构建所用版本见 `build/toolchain.txt`）。这不代表构建失败——请在完全一致的工具链下重试，或对比 `-buildconf` 与功能表现。
+- **验证运行**：该二进制为完全静态链接（`ldd` 显示 not a dynamic executable），可在**对应架构**的 Linux（glibc 或 musl 环境）直接运行——amd64 产物需 x86-64 内核，arm64 产物需 aarch64 内核。
+- **哈希不一致？**若你未修改源码但哈希与 §3 不同，通常是工具链版本差异（Alpine 仓库滚动更新；Sonfly 构建所用版本见 `build/toolchain.txt`（amd64）与 `build/toolchain-arm64.txt`（arm64））。这不代表构建失败——请在完全一致的工具链下重试，或对比 `-buildconf` 与功能表现。
 - **签名验证**：FFmpeg 与 musl 的源码归档可用 `sources/keys/` 中的公钥验证（`gpg --import keys/*.asc && gpg --verify ffmpeg-7.0.2.tar.xz.asc ffmpeg-7.0.2.tar.xz`）。LAME 上游未发布签名文件。
 
 ## 7. 联系

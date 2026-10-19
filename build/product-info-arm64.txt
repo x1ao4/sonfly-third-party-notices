@@ -1,0 +1,63 @@
+# ffmpeg 产物信息（采集环境：linux/arm64 / Alpine 3.22 / musl 静态链接）
+# 构建配置：LAME 以 --disable-decoder 构建（不含其内置 mpglib 解码引擎）
+# 采集时间：2026-10-19
+
+## ffmpeg -version
+ffmpeg version 7.0.2 Copyright (c) 2000-2024 the FFmpeg developers
+built with gcc 14.2.0 (Alpine 14.2.0)
+configuration: --prefix=/build/out --disable-debug --disable-doc --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --disable-indev=v4l2 --disable-outdev=v4l2 --disable-indev=fbdev --disable-outdev=fbdev --enable-libmp3lame --disable-shared --enable-static --extra-cflags=-I/build/lame/include --extra-ldflags='-static -L/build/lame/lib' --cc=gcc
+libavutil      59.  8.100 / 59.  8.100
+libavcodec     61.  3.100 / 61.  3.100
+libavformat    61.  1.100 / 61.  1.100
+libavdevice    61.  1.100 / 61.  1.100
+libavfilter    10.  1.100 / 10.  1.100
+libswscale      8.  1.100 /  8.  1.100
+libswresample   5.  1.100 /  5.  1.100
+
+## ffmpeg -L
+  libavfilter    10.  1.100 / 10.  1.100
+  libswscale      8.  1.100 /  8.  1.100
+  libswresample   5.  1.100 /  5.  1.100
+ffmpeg is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+ffmpeg is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with ffmpeg; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+## ffmpeg -buildconf
+ffmpeg version 7.0.2 Copyright (c) 2000-2024 the FFmpeg developers
+  built with gcc 14.2.0 (Alpine 14.2.0)
+  configuration: --prefix=/build/out --disable-debug --disable-doc --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --disable-indev=v4l2 --disable-outdev=v4l2 --disable-indev=fbdev --disable-outdev=fbdev --enable-libmp3lame --disable-shared --enable-static --extra-cflags=-I/build/lame/include --extra-ldflags='-static -L/build/lame/lib' --cc=gcc
+  libavutil      59.  8.100 / 59.  8.100
+  libavcodec     61.  3.100 / 61.  3.100
+  libavformat    61.  1.100 / 61.  1.100
+  libavdevice    61.  1.100 / 61.  1.100
+  libavfilter    10.  1.100 / 10.  1.100
+  libswscale      8.  1.100 /  8.  1.100
+  libswresample   5.  1.100 /  5.  1.100
+
+  configuration:
+    --prefix=/build/out
+    --disable-debug
+    --disable-doc
+    --disable-ffplay
+    --disable-indev=sndio
+    --disable-outdev=sndio
+    --disable-indev=v4l2
+    --disable-outdev=v4l2
+    --disable-indev=fbdev
+    --disable-outdev=fbdev
+    --enable-libmp3lame
+    --disable-shared
+    --enable-static
+    --extra-cflags=-I/build/lame/include
+    --extra-ldflags='-static -L/build/lame/lib'
+    --cc=gcc

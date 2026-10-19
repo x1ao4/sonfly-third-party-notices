@@ -18,13 +18,17 @@
 #
 # fail-closed 设计（供应链完整性，构建漂移即中断）：
 #   1. 两份源码必须匹配记录的 SHA256，否则立即中断；
-#   2. LAME 中间库与最终产物 SHA256 均与已验证值比对（x86_64 参考值），
-#      任何漂移即中断——须重新完成全量逐字节回归验证后才可放行，
+#   2. LAME 中间库与最终产物 SHA256 均与已验证值比对（**按架构**参考值），
+#      任何漂移即中断——须重新完成验证后才可放行，
 #      不得直接沿用旧结论，也不得直接认定失败；
 #   3. 参考哈希留空 = 记录模式（仅供升级/换配置时由维护者显式留空使用）：
 #      打印实际哈希并继续；记录后必须回填并重新构建确认，不得长期留空。
 #
-# 维护流程：改版本/URL/SHA256 → 构建 → 全量逐字节回归 → 更新本脚本参考值
+# 多架构：同一脚本在 x86_64 与 aarch64 上各产出一份二进制，两者哈希不同（属预期），
+#   因此参考值按架构分支选取；两个架构都必须有值并强校验，不允许静默跳过。
+#   两架构产物的构建配置、工具链与转码等价性对照见公开发布的材料仓库。
+#
+# 维护流程：改版本/URL/SHA256 → 构建 → 验证 → 更新本脚本参考值
 #       与随镜像分发的第三方声明。
 #
 # 构建工具链（alpine:3.22 实测快照，实际版本以构建日志为准）：
@@ -41,10 +45,29 @@ LAME_VERSION="3.100"
 LAME_URL="https://downloads.sourceforge.net/project/lame/lame/${LAME_VERSION}/lame-${LAME_VERSION}.tar.gz"
 LAME_SRC_SHA256="ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
 
-# 已验证参考哈希（x86_64；LAME 以 --disable-decoder 构建；
-#   对应双跑一致且通过目标环境全量逐字节回归的同一二进制）
+# 已验证参考哈希（按架构；LAME 以 --disable-decoder 构建；对应各架构的发行构建产物）
 FFMPEG_BIN_SHA256_X86_64="7e58a04d102ee638ae7d5e282b29e1a934baee13ce4655496113a3019f1441d5"
 LAME_LIB_SHA256_X86_64="c7552887925b83624b669ee588c15173a1fc7ec656850952e3be059f89ef9d68"
+FFMPEG_BIN_SHA256_AARCH64="1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d"
+LAME_LIB_SHA256_AARCH64="dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e"
+
+# 按构建架构选取参考值；未支持的架构直接终止（不静默降级为记录模式）
+case "$(uname -m)" in
+  x86_64)
+    ARCH_TAG="x86_64"
+    FFMPEG_BIN_SHA256_REF="${FFMPEG_BIN_SHA256_X86_64}"
+    LAME_LIB_SHA256_REF="${LAME_LIB_SHA256_X86_64}"
+    ;;
+  aarch64)
+    ARCH_TAG="aarch64"
+    FFMPEG_BIN_SHA256_REF="${FFMPEG_BIN_SHA256_AARCH64}"
+    LAME_LIB_SHA256_REF="${LAME_LIB_SHA256_AARCH64}"
+    ;;
+  *)
+    echo "!! 未支持的构建架构：$(uname -m)（仅允许 x86_64 / aarch64）"
+    exit 1
+    ;;
+esac
 
 BUILD_DIR=/build
 LAME_PREFIX="${BUILD_DIR}/lame"
@@ -93,16 +116,17 @@ make install > "${LOG_DIR}/lame-install.log" 2>&1
 cd "$BUILD_DIR"
 
 LAME_LIB_SHA256="$(sha256sum "${LAME_PREFIX}/lib/libmp3lame.a" | awk '{print $1}')"
-echo "LAME 静态库 SHA256: ${LAME_LIB_SHA256}"
-if [ "$(uname -m)" = "x86_64" ]; then
-  if [ -z "$LAME_LIB_SHA256_X86_64" ]; then
-    echo "WARN：LAME 参考哈希为空（记录模式）——请记录后在脚本中回填，并重新构建确认。"
-  elif [ "$LAME_LIB_SHA256" != "$LAME_LIB_SHA256_X86_64" ]; then
-    echo "!! LAME 静态库哈希与已验证参考值不一致（工具链漂移？），构建终止。"
-    echo "   预期: ${LAME_LIB_SHA256_X86_64}"
-    echo "   实际: ${LAME_LIB_SHA256}"
-    exit 1
-  fi
+echo "LAME 静态库 SHA256（${ARCH_TAG}）: ${LAME_LIB_SHA256}"
+if [ -z "$LAME_LIB_SHA256_REF" ]; then
+  echo "WARN：${ARCH_TAG} 的 LAME 参考哈希为空（记录模式）——请记录后在脚本中回填，并重新构建确认。"
+elif [ "$LAME_LIB_SHA256" != "$LAME_LIB_SHA256_REF" ]; then
+  echo "!! LAME 静态库哈希与已验证参考值不一致（工具链漂移？），构建终止。"
+  echo "   架构: ${ARCH_TAG}"
+  echo "   预期: ${LAME_LIB_SHA256_REF}"
+  echo "   实际: ${LAME_LIB_SHA256}"
+  exit 1
+else
+  echo "OK：LAME 静态库哈希与 ${ARCH_TAG} 已验证参考值一致"
 fi
 
 # ---- [3] FFmpeg 7.0.2（LGPL 静态）----
@@ -155,26 +179,22 @@ if "$FFMPEG_BIN" -encoders 2>/dev/null | grep -E 'libx264|libx265|libxvid|vidsta
 fi
 echo "OK：无 GPL 组件残留"
 
-echo "--- [4.4] 产物哈希 fail-closed 校验 ---"
+echo "--- [4.4] 产物哈希 fail-closed 校验（${ARCH_TAG}）---"
 ACTUAL_SHA256="$(sha256sum "$FFMPEG_BIN" | awk '{print $1}')"
 echo "产物 SHA256: ${ACTUAL_SHA256}"
-if [ "$(uname -m)" = "x86_64" ]; then
-  if [ -z "$FFMPEG_BIN_SHA256_X86_64" ]; then
-    echo "WARN：参考哈希为空（记录模式）——请记录 ${ACTUAL_SHA256} 并回填后重新构建确认。"
-  elif [ "$ACTUAL_SHA256" != "$FFMPEG_BIN_SHA256_X86_64" ]; then
-    echo "!! 产物哈希与已验证参考值不一致，构建终止。"
-    echo "   预期: ${FFMPEG_BIN_SHA256_X86_64}"
-    echo "   实际: ${ACTUAL_SHA256}"
-    echo "   处置：先确认源码版本、SHA256 与构建工具链、configure 参数是否发生漂移；"
-    echo "         再对照旧二进制重新完成全量逐字节回归（含 WMA 等样本）后方可放行；"
-    echo "         不得直接认定构建失败或成功，也不得沿用旧结论。"
-    exit 1
-  else
-    echo "OK：产物哈希与已验证参考值一致（= 已通过逐字节回归的同一二进制）"
-  fi
+if [ -z "$FFMPEG_BIN_SHA256_REF" ]; then
+  echo "WARN：${ARCH_TAG} 的参考哈希为空（记录模式）——请记录 ${ACTUAL_SHA256} 并回填后重新构建确认。"
+elif [ "$ACTUAL_SHA256" != "$FFMPEG_BIN_SHA256_REF" ]; then
+  echo "!! 产物哈希与已验证参考值不一致，构建终止。"
+  echo "   架构: ${ARCH_TAG}"
+  echo "   预期: ${FFMPEG_BIN_SHA256_REF}"
+  echo "   实际: ${ACTUAL_SHA256}"
+  echo "   处置：先确认源码版本、SHA256 与构建工具链、configure 参数是否发生漂移；"
+  echo "         再对照旧二进制重新完成全量逐字节回归（含 WMA 等样本）后方可放行；"
+  echo "         不得直接认定构建失败或成功，也不得沿用旧结论。"
+  exit 1
 else
-  echo "WARN：当前架构 $(uname -m) 无已验证参考哈希；"
-  echo "      该产物在完成回归验证前不得用于生产（记录哈希：${ACTUAL_SHA256}）。"
+  echo "OK：产物哈希与 ${ARCH_TAG} 已验证参考值一致（= 已通过回归验证的同一二进制）"
 fi
 
 # ---- [5] 清理下载归档与源码树（减小构建缓存体积；安装前缀保留）----

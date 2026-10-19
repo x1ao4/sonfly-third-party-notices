@@ -1,0 +1,22 @@
+# 构建工具链与环境记录（linux/arm64）
+# 构建日期：2026-10-19（与 Sonfly 镜像 ffmpeg-build 阶段使用相同配置）
+# 基础镜像：alpine:3.22 @ sha256:5291449c3df73caf6ed85e649dec1b9e818b39a5d8c871e97afc13e9cd5e8fa8（多架构 index 的 arm64 变体）
+# 构建方式：在 x86_64 环境中经 QEMU 模拟 linux/arm64（工具链版本与 amd64 一致）
+
+NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.22.6
+gcc (Alpine 14.2.0) 14.2.0
+GNU ld (GNU Binutils) 2.44
+GNU Make 4.4.1
+NASM version 2.16.03 compiled on Apr 20 2025
+binutils-2.44-r3
+build-base-0.5-r3
+gcc-14.2.0-r6
+linux-headers-6.14.2-r0
+make-4.4.1-r3
+musl-1.2.5-r12
+musl-dev-1.2.5-r12
+musl-utils-1.2.5-r12
+nasm-2.16.03-r0
+pkgconf-2.4.3-r0

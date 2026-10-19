@@ -1,0 +1,3457 @@
+# linux/arm64 FFmpeg 构建日志（2026-10-19）
+# 构建阶段：docker/Dockerfile 的 ffmpeg-build（alpine:3.22 / aarch64）
+# 依赖安装（apk）命中构建缓存，工具链版本见 toolchain-arm64.txt
+# 以下为构建脚本输出（set -x）
+
++ FFMPEG_VERSION=7.0.2
++ FFMPEG_URL=https://ffmpeg.org/releases/ffmpeg-7.0.2.tar.xz
++ FFMPEG_SRC_SHA256=8646515b638a3ad303e23af6a3587734447cb8fc0a0c064ecdb8e95c4fd8b389
++ LAME_VERSION=3.100
++ LAME_URL=https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
++ LAME_SRC_SHA256=ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e
++ FFMPEG_BIN_SHA256_X86_64=7e58a04d102ee638ae7d5e282b29e1a934baee13ce4655496113a3019f1441d5
++ LAME_LIB_SHA256_X86_64=c7552887925b83624b669ee588c15173a1fc7ec656850952e3be059f89ef9d68
++ FFMPEG_BIN_SHA256_AARCH64=1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d
++ LAME_LIB_SHA256_AARCH64=dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e
++ uname -m
++ ARCH_TAG=aarch64
++ FFMPEG_BIN_SHA256_REF=1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d
++ LAME_LIB_SHA256_REF=dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e
++ BUILD_DIR=/build
++ LAME_PREFIX=/build/lame
++ OUT_PREFIX=/build/out
++ LOG_DIR=/build/logs
++ mkdir -p /build/logs
++ echo '===== [0] 构建环境记录 ====='
+===== [0] 构建环境记录 =====
++ head -3 /etc/os-release
+NAME="Alpine Linux"
+ID=alpine
+VERSION_ID=3.22.6
++ gcc --version
++ head -1
+gcc (Alpine 14.2.0) 14.2.0
++ ld --version
++ head -1
+GNU ld (GNU Binutils) 2.44
++ make --version
++ head -1
+GNU Make 4.4.1
++ nasm -v
+NASM version 2.16.03 compiled on Apr 20 2025
+...
++ grep -E '^(musl|gcc|binutils|make|nasm|pkgconf|linux-headers|build-base)'
++ sort
++ apk info -v
+binutils-2.44-r3
+build-base-0.5-r3
+gcc-14.2.0-r6
+linux-headers-6.14.2-r0
+make-4.4.1-r3
+musl-1.2.5-r12
+musl-dev-1.2.5-r12
+musl-utils-1.2.5-r12
+nasm-2.16.03-r0
+pkgconf-2.4.3-r0
++ cd /build
++ echo '===== [1] 下载源码（含 SHA256 fail-closed 校验）====='===== [1] 下载源码（含 SHA256 fail-closed 校验）=====
+
++ curl -fsSL --retry 3 --retry-delay 2 -o lame-3.100.tar.gz https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz
+...
++ sha256sum -c -
++ echo 'ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e  lame-3.100.tar.gz'
+lame-3.100.tar.gz: OK
++ curl -fsSL --retry 3 --retry-delay 2 -o ffmpeg-7.0.2.tar.xz https://ffmpeg.org/releases/ffmpeg-7.0.2.tar.xz
+...
++ + echo '8646515b638a3ad303e23af6a3587734447cb8fc0a0c064ecdb8e95c4fd8b389  ffmpeg-7.0.2.tar.xz'
+sha256sum -c -
+ffmpeg-7.0.2.tar.xz: OK
++ echo '===== [2] 构建 LAME 3.100 ====='
++ tar -xzf lame-3.100.tar.gz
+===== [2] 构建 LAME 3.100 =====
++ cd lame-3.100
++ CFLAGS='-O2 -fomit-frame-pointer' ./configure '--prefix=/build/lame' --disable-shared --enable-static --disable-frontend --disable-decoder
+...
+...
+...
+...
+...
++ cat /build/logs/lame-configure.log
+checking build system type... aarch64-unknown-linux-gnu
+checking host system type... aarch64-unknown-linux-gnu
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... ./install-sh -c -d
+checking for gawk... no
+checking for mawk... no
+checking for nawk... no
+checking for awk... awk
+checking whether make sets $(MAKE)... yes
+checking whether make supports nested variables... yes
+checking whether to enable maintainer-specific portions of Makefiles... no
+checking for style of include used by make... GNU
+checking for gcc... gcc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to accept ISO C89... none needed
+checking whether gcc understands -c and -o together... yes
+checking dependency style of gcc... gcc3
+checking how to run the C preprocessor... gcc -E
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking minix/config.h usability... no
+checking minix/config.h presence... no
+checking for minix/config.h... no
+checking whether it is safe to define __EXTENSIONS__... yes
+checking for library containing strerror... none required
+checking how to print strings... printf
+checking for a sed that does not truncate output... /bin/sed
+checking for fgrep... /bin/grep -F
+checking for ld used by gcc... /usr/aarch64-alpine-linux-musl/bin/ld
+checking if the linker (/usr/aarch64-alpine-linux-musl/bin/ld) is GNU ld... yes
+checking for BSD- or MS-compatible name lister (nm)... /usr/bin/nm -B
+checking the name lister (/usr/bin/nm -B) interface... BSD nm
+checking whether ln -s works... yes
+checking the maximum length of command line arguments... 98304
+checking how to convert aarch64-unknown-linux-gnu file names to aarch64-unknown-linux-gnu format... func_convert_file_noop
+checking how to convert aarch64-unknown-linux-gnu file names to toolchain format... func_convert_file_noop
+checking for /usr/aarch64-alpine-linux-musl/bin/ld option to reload object files... -r
+checking for objdump... objdump
+checking how to recognize dependent libraries... pass_all
+checking for dlltool... no
+checking how to associate runtime and link libraries... printf %s\n
+checking for ar... ar
+checking for archiver @FILE support... @
+checking for strip... strip
+checking for ranlib... ranlib
+checking command to parse /usr/bin/nm -B output from gcc object... ok
+checking for sysroot... no
+checking for a working dd... /bin/dd
+checking how to truncate binary pipes... /bin/dd bs=4096 count=1
+checking for mt... no
+checking if : is a manifest tool... no
+checking for dlfcn.h... yes
+checking for objdir... .libs
+checking if gcc supports -fno-rtti -fno-exceptions... no
+checking for gcc option to produce PIC... -fPIC -DPIC
+checking if gcc PIC flag -fPIC -DPIC works... yes
+checking if gcc static flag -static works... yes
+checking if gcc supports -c -o file.o... yes
+checking if gcc supports -c -o file.o... (cached) yes
+checking whether the gcc linker (/usr/aarch64-alpine-linux-musl/bin/ld) supports shared libraries... yes
+checking dynamic linker characteristics... GNU/Linux ld.so
+checking how to hardcode library paths into programs... immediate
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... no
+checking whether to build static libraries... yes
+checking for gcc... (cached) gcc
+checking whether we are using the GNU C compiler... (cached) yes
+checking whether gcc accepts -g... (cached) yes
+checking for gcc option to accept ISO C89... (cached) none needed
+checking whether gcc understands -c and -o together... (cached) yes
+checking dependency style of gcc... (cached) gcc3
+checking compiler... gcc
+checking version of GCC... unknown compiler version pattern
+checking dmalloc.h usability... no
+checking dmalloc.h presence... no
+checking for dmalloc.h... no
+checking for ANSI C header files... (cached) yes
+checking errno.h usability... yes
+checking errno.h presence... yes
+checking for errno.h... yes
+checking fcntl.h usability... yes
+checking fcntl.h presence... yes
+checking for fcntl.h... yes
+checking limits.h usability... yes
+checking limits.h presence... yes
+checking for limits.h... yes
+checking for stdint.h... (cached) yes
+checking for string.h... (cached) yes
+checking sys/soundcard.h usability... yes
+checking sys/soundcard.h presence... yes
+checking for sys/soundcard.h... yes
+checking sys/time.h usability... yes
+checking sys/time.h presence... yes
+checking for sys/time.h... yes
+checking for unistd.h... (cached) yes
+checking linux/soundcard.h usability... yes
+checking linux/soundcard.h presence... yes
+checking for linux/soundcard.h... yes
+checking working SSE intrinsics... no
+checking for an ANSI C-conforming const... yes
+checking for inline... inline
+checking whether byte ordering is bigendian... no
+checking for special C compiler options needed for large files... no
+checking for _FILE_OFFSET_BITS value needed for large files... no
+checking size of short... 2
+checking size of unsigned short... 2
+checking size of int... 4
+checking size of unsigned int... 4
+checking size of long... 8
+checking size of unsigned long... 8
+checking size of long long... 8
+checking size of unsigned long long... 8
+checking size of float... 4
+checking size of double... 8
+checking for long double with more range or precision than double... yes
+checking for uint8_t... yes
+checking for int8_t... yes
+checking for uint16_t... yes
+checking for int16_t... yes
+checking for uint32_t... yes
+checking for int32_t... yes
+checking for uint64_t... yes
+checking for int64_t... yes
+checking for IEEE854 compliant 80 bit floats... yes
+checking for ieee854_float80_t... no
+checking for ieee754_float64_t... no
+checking for ieee754_float32_t... no
+checking for size_t... yes
+checking whether time.h and sys/time.h may both be included... yes
+checking for working alloca.h... yes
+checking for alloca... yes
+checking for gettimeofday... yes
+checking for strtol... yes
+checking for socket... yes
+checking termcap.h usability... no
+checking termcap.h presence... no
+checking for termcap.h... no
+checking ncurses/termcap.h usability... no
+checking ncurses/termcap.h presence... no
+checking for ncurses/termcap.h... no
+checking for initscr in -ltermcap... no
+checking for initscr in -lcurses... no
+checking for initscr in -lncurses... no
+checking for ld used by gcc... /usr/aarch64-alpine-linux-musl/bin/ld
+checking if the linker (/usr/aarch64-alpine-linux-musl/bin/ld) is GNU ld... yes
+checking for shared library run path origin... done
+checking for iconv... yes
+checking for working iconv... yes
+checking for iconv declaration... 
+         extern size_t iconv (iconv_t cd, char * *inbuf, size_t *inbytesleft, char * *outbuf, size_t *outbytesleft);
+checking for cos in -lm... yes
+checking for cos in -lffm... no
+checking for cos in -lcpml... no
+checking for gtk-config... no
+checking for GTK - version >= 1.2.0... no
+*** The gtk-config script installed by GTK could not be found
+*** If GTK was installed in PREFIX, make sure PREFIX/bin is in
+*** your path, or set the GTK_CONFIG environment variable to the
+*** full path to gtk-config.
+checking use of ElectricFence malloc debugging... no
+checking use of file io... lame
+checking use of analyzer hooks... yes
+checking use of mpg123 decoder... no
+checking if the lame frontend should be build... no
+checking if mp3x is requested... no
+checking if mp3rtp is requested... no
+checking if dynamic linking of the frontends is requested... no
+checking for termcap... no
+checking if I have to build the internal vector lib... no
+checking for nasm... /usr/bin/nasm
+checking for assembler routines for this processor type... no
+checking for additional optimizations... no
+checking for debug options... no
+checking that generated files are newer than configure... done
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating libmp3lame/Makefile
+config.status: creating libmp3lame/i386/Makefile
+config.status: creating libmp3lame/vector/Makefile
+config.status: creating frontend/Makefile
+config.status: creating mpglib/Makefile
+config.status: creating doc/Makefile
+config.status: creating doc/html/Makefile
+config.status: creating doc/man/Makefile
+config.status: creating include/Makefile
+config.status: creating Dll/Makefile
+config.status: creating misc/Makefile
+config.status: creating dshow/Makefile
+config.status: creating ACM/Makefile
+config.status: creating ACM/ADbg/Makefile
+config.status: creating ACM/ddk/Makefile
+config.status: creating ACM/tinyxml/Makefile
+config.status: creating lame.spec
+config.status: creating mac/Makefile
+config.status: creating macosx/Makefile
+config.status: creating macosx/English.lproj/Makefile
+config.status: creating macosx/LAME.xcodeproj/Makefile
+config.status: creating vc_solution/Makefile
+config.status: creating config.h
+config.status: executing depfiles commands
+config.status: executing libtool commands
++ grep -q 'use of mpg123 decoder\.\.\. no' /build/logs/lame-configure.log
++ nproc
++ make -j12
++ cat /build/logs/lame-make.log
+make  all-recursive
+make[1]: Entering directory '/build/lame-3.100'
+Making all in mpglib
+make[2]: Entering directory '/build/lame-3.100/mpglib'
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../libmp3lame -I..    -O2 -fomit-frame-pointer -MT common.lo -MD -MP -MF .deps/common.Tpo -c -o common.lo common.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../libmp3lame -I..    -O2 -fomit-frame-pointer -MT dct64_i386.lo -MD -MP -MF .deps/dct64_i386.Tpo -c -o dct64_i386.lo dct64_i386.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../libmp3lame -I..    -O2 -fomit-frame-pointer -MT decode_i386.lo -MD -MP -MF .deps/decode_i386.Tpo -c -o decode_i386.lo decode_i386.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../libmp3lame -I..    -O2 -fomit-frame-pointer -MT interface.lo -MD -MP -MF .deps/interface.Tpo -c -o interface.lo interface.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../libmp3lame -I..    -O2 -fomit-frame-pointer -MT layer1.lo -MD -MP -MF .deps/layer1.Tpo -c -o layer1.lo layer1.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../libmp3lame -I..    -O2 -fomit-frame-pointer -MT layer2.lo -MD -MP -MF .deps/layer2.Tpo -c -o layer2.lo layer2.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../libmp3lame -I..    -O2 -fomit-frame-pointer -MT layer3.lo -MD -MP -MF .deps/layer3.Tpo -c -o layer3.lo layer3.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../libmp3lame -I..    -O2 -fomit-frame-pointer -MT tabinit.lo -MD -MP -MF .deps/tabinit.Tpo -c -o tabinit.lo tabinit.c
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../libmp3lame -I.. -O2 -fomit-frame-pointer -MT common.lo -MD -MP -MF .deps/common.Tpo -c common.c -o common.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../libmp3lame -I.. -O2 -fomit-frame-pointer -MT dct64_i386.lo -MD -MP -MF .deps/dct64_i386.Tpo -c dct64_i386.c -o dct64_i386.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../libmp3lame -I.. -O2 -fomit-frame-pointer -MT layer2.lo -MD -MP -MF .deps/layer2.Tpo -c layer2.c -o layer2.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../libmp3lame -I.. -O2 -fomit-frame-pointer -MT decode_i386.lo -MD -MP -MF .deps/decode_i386.Tpo -c decode_i386.c -o decode_i386.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../libmp3lame -I.. -O2 -fomit-frame-pointer -MT layer3.lo -MD -MP -MF .deps/layer3.Tpo -c layer3.c -o layer3.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../libmp3lame -I.. -O2 -fomit-frame-pointer -MT interface.lo -MD -MP -MF .deps/interface.Tpo -c interface.c -o interface.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../libmp3lame -I.. -O2 -fomit-frame-pointer -MT layer1.lo -MD -MP -MF .deps/layer1.Tpo -c layer1.c -o layer1.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../libmp3lame -I.. -O2 -fomit-frame-pointer -MT tabinit.lo -MD -MP -MF .deps/tabinit.Tpo -c tabinit.c -o tabinit.o
+mv -f .deps/dct64_i386.Tpo .deps/dct64_i386.Plo
+mv -f .deps/tabinit.Tpo .deps/tabinit.Plo
+mv -f .deps/common.Tpo .deps/common.Plo
+mv -f .deps/decode_i386.Tpo .deps/decode_i386.Plo
+mv -f .deps/layer1.Tpo .deps/layer1.Plo
+mv -f .deps/interface.Tpo .deps/interface.Plo
+mv -f .deps/layer2.Tpo .deps/layer2.Plo
+mv -f .deps/layer3.Tpo .deps/layer3.Plo
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -O2 -fomit-frame-pointer   -o libmpgdecoder.la  common.lo dct64_i386.lo decode_i386.lo interface.lo layer1.lo layer2.lo layer3.lo tabinit.lo  
+libtool: link: ar cru .libs/libmpgdecoder.a  common.o dct64_i386.o decode_i386.o interface.o layer1.o layer2.o layer3.o tabinit.o
+ar: `u' modifier ignored since `D' is the default (see `U')
+libtool: link: ranlib .libs/libmpgdecoder.a
+libtool: link: ( cd ".libs" && rm -f "libmpgdecoder.la" && ln -s "../libmpgdecoder.la" "libmpgdecoder.la" )
+make[2]: Leaving directory '/build/lame-3.100/mpglib'
+Making all in libmp3lame
+make[2]: Entering directory '/build/lame-3.100/libmp3lame'
+Making all in i386
+make[3]: Entering directory '/build/lame-3.100/libmp3lame/i386'
+Makefile:622: warning: ignoring prerequisites on suffix rule definition
+Makefile:619: warning: ignoring prerequisites on suffix rule definition
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/libmp3lame/i386'
+Making all in vector
+make[3]: Entering directory '/build/lame-3.100/libmp3lame/vector'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/libmp3lame/vector'
+make[3]: Entering directory '/build/lame-3.100/libmp3lame'
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT VbrTag.lo -MD -MP -MF .deps/VbrTag.Tpo -c -o VbrTag.lo VbrTag.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT bitstream.lo -MD -MP -MF .deps/bitstream.Tpo -c -o bitstream.lo bitstream.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT encoder.lo -MD -MP -MF .deps/encoder.Tpo -c -o encoder.lo encoder.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT fft.lo -MD -MP -MF .deps/fft.Tpo -c -o fft.lo fft.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT gain_analysis.lo -MD -MP -MF .deps/gain_analysis.Tpo -c -o gain_analysis.lo gain_analysis.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT id3tag.lo -MD -MP -MF .deps/id3tag.Tpo -c -o id3tag.lo id3tag.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT lame.lo -MD -MP -MF .deps/lame.Tpo -c -o lame.lo lame.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT newmdct.lo -MD -MP -MF .deps/newmdct.Tpo -c -o newmdct.lo newmdct.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT presets.lo -MD -MP -MF .deps/presets.Tpo -c -o presets.lo presets.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT psymodel.lo -MD -MP -MF .deps/psymodel.Tpo -c -o psymodel.lo psymodel.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT quantize.lo -MD -MP -MF .deps/quantize.Tpo -c -o quantize.lo quantize.c
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT quantize_pvt.lo -MD -MP -MF .deps/quantize_pvt.Tpo -c -o quantize_pvt.lo quantize_pvt.c
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT fft.lo -MD -MP -MF .deps/fft.Tpo -c fft.c -o fft.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT bitstream.lo -MD -MP -MF .deps/bitstream.Tpo -c bitstream.c -o bitstream.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT gain_analysis.lo -MD -MP -MF .deps/gain_analysis.Tpo -c gain_analysis.c -o gain_analysis.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT psymodel.lo -MD -MP -MF .deps/psymodel.Tpo -c psymodel.c -o psymodel.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT VbrTag.lo -MD -MP -MF .deps/VbrTag.Tpo -c VbrTag.c -o VbrTag.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT newmdct.lo -MD -MP -MF .deps/newmdct.Tpo -c newmdct.c -o newmdct.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT presets.lo -MD -MP -MF .deps/presets.Tpo -c presets.c -o presets.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT encoder.lo -MD -MP -MF .deps/encoder.Tpo -c encoder.c -o encoder.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT id3tag.lo -MD -MP -MF .deps/id3tag.Tpo -c id3tag.c -o id3tag.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT lame.lo -MD -MP -MF .deps/lame.Tpo -c lame.c -o lame.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT quantize_pvt.lo -MD -MP -MF .deps/quantize_pvt.Tpo -c quantize_pvt.c -o quantize_pvt.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT quantize.lo -MD -MP -MF .deps/quantize.Tpo -c quantize.c -o quantize.o
+quantize.c: In function 'VBR_old_iteration_loop':
+quantize.c:1508:22: warning: 'VBR_old_prepare' accessing 64 bytes in a region of size 60 [-Wstringop-overflow=]
+ 1508 |     analog_silence = VBR_old_prepare(gfc, pe, ms_ener_ratio, ratio,
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 1509 |                                      l3_xmin, frameBits, min_bits, max_bits, bands);
+      |                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+quantize.c:1508:22: note: referencing argument 6 of type 'int[16]'
+quantize.c:1508:22: note: referencing argument 7 of type 'int[2][2]'
+quantize.c:1508:22: note: referencing argument 8 of type 'int[2][2]'
+quantize.c:1508:22: note: referencing argument 9 of type 'int[2][2]'
+quantize.c:1390:1: note: in a call to function 'VBR_old_prepare'
+ 1390 | VBR_old_prepare(lame_internal_flags * gfc,
+      | ^~~~~~~~~~~~~~~
+quantize.c: In function 'VBR_new_iteration_loop':
+quantize.c:1668:22: warning: 'VBR_new_prepare' accessing 64 bytes in a region of size 60 [-Wstringop-overflow=]
+ 1668 |     analog_silence = VBR_new_prepare(gfc, pe, ratio, l3_xmin, frameBits, max_bits, &pad);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+quantize.c:1668:22: note: referencing argument 5 of type 'int[16]'
+quantize.c:1668:22: note: referencing argument 6 of type 'int[2][2]'
+quantize.c:1583:1: note: in a call to function 'VBR_new_prepare'
+ 1583 | VBR_new_prepare(lame_internal_flags * gfc,
+      | ^~~~~~~~~~~~~~~
+mv -f .deps/fft.Tpo .deps/fft.Plo
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT reservoir.lo -MD -MP -MF .deps/reservoir.Tpo -c -o reservoir.lo reservoir.c
+mv -f .deps/presets.Tpo .deps/presets.Plo
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT set_get.lo -MD -MP -MF .deps/set_get.Tpo -c -o set_get.lo set_get.c
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT reservoir.lo -MD -MP -MF .deps/reservoir.Tpo -c reservoir.c -o reservoir.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT set_get.lo -MD -MP -MF .deps/set_get.Tpo -c set_get.c -o set_get.o
+mv -f .deps/gain_analysis.Tpo .deps/gain_analysis.Plo
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT tables.lo -MD -MP -MF .deps/tables.Tpo -c -o tables.lo tables.c
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT tables.lo -MD -MP -MF .deps/tables.Tpo -c tables.c -o tables.o
+mv -f .deps/VbrTag.Tpo .deps/VbrTag.Plo
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT takehiro.lo -MD -MP -MF .deps/takehiro.Tpo -c -o takehiro.lo takehiro.c
+mv -f .deps/encoder.Tpo .deps/encoder.Plo
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT util.lo -MD -MP -MF .deps/util.Tpo -c -o util.lo util.c
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT takehiro.lo -MD -MP -MF .deps/takehiro.Tpo -c takehiro.c -o takehiro.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT util.lo -MD -MP -MF .deps/util.Tpo -c util.c -o util.o
+mv -f .deps/newmdct.Tpo .deps/newmdct.Plo
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT vbrquantize.lo -MD -MP -MF .deps/vbrquantize.Tpo -c -o vbrquantize.lo vbrquantize.c
+mv -f .deps/reservoir.Tpo .deps/reservoir.Plo
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT version.lo -MD -MP -MF .deps/version.Tpo -c -o version.lo version.c
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT vbrquantize.lo -MD -MP -MF .deps/vbrquantize.Tpo -c vbrquantize.c -o vbrquantize.o
+mv -f .deps/tables.Tpo .deps/tables.Plo
+/bin/sh ../libtool  --tag=CC   --mode=compile gcc -DHAVE_CONFIG_H  -I. -I.. -I../include -I. -I../mpglib -I..    -O2 -fomit-frame-pointer -MT mpglib_interface.lo -MD -MP -MF .deps/mpglib_interface.Tpo -c -o mpglib_interface.lo mpglib_interface.c
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT version.lo -MD -MP -MF .deps/version.Tpo -c version.c -o version.o
+libtool: compile:  gcc -DHAVE_CONFIG_H -I. -I.. -I../include -I. -I../mpglib -I.. -O2 -fomit-frame-pointer -MT mpglib_interface.lo -MD -MP -MF .deps/mpglib_interface.Tpo -c mpglib_interface.c -o mpglib_interface.o
+mv -f .deps/mpglib_interface.Tpo .deps/mpglib_interface.Plo
+mv -f .deps/quantize_pvt.Tpo .deps/quantize_pvt.Plo
+mv -f .deps/version.Tpo .deps/version.Plo
+mv -f .deps/bitstream.Tpo .deps/bitstream.Plo
+mv -f .deps/id3tag.Tpo .deps/id3tag.Plo
+mv -f .deps/lame.Tpo .deps/lame.Plo
+mv -f .deps/util.Tpo .deps/util.Plo
+mv -f .deps/set_get.Tpo .deps/set_get.Plo
+mv -f .deps/quantize.Tpo .deps/quantize.Plo
+mv -f .deps/takehiro.Tpo .deps/takehiro.Plo
+mv -f .deps/psymodel.Tpo .deps/psymodel.Plo
+mv -f .deps/vbrquantize.Tpo .deps/vbrquantize.Plo
+/bin/sh ../libtool  --tag=CC   --mode=link gcc  -O2 -fomit-frame-pointer -version-info 0:0 -export-symbols ../include/libmp3lame.sym -no-undefined  -o libmp3lame.la -rpath /build/lame/lib VbrTag.lo bitstream.lo encoder.lo fft.lo gain_analysis.lo id3tag.lo lame.lo newmdct.lo presets.lo psymodel.lo quantize.lo quantize_pvt.lo reservoir.lo set_get.lo tables.lo takehiro.lo util.lo vbrquantize.lo version.lo mpglib_interface.lo    -lm 
+libtool: link: ar cru .libs/libmp3lame.a  VbrTag.o bitstream.o encoder.o fft.o gain_analysis.o id3tag.o lame.o newmdct.o presets.o psymodel.o quantize.o quantize_pvt.o reservoir.o set_get.o tables.o takehiro.o util.o vbrquantize.o version.o mpglib_interface.o
+ar: `u' modifier ignored since `D' is the default (see `U')
+libtool: link: ranlib .libs/libmp3lame.a
+libtool: link: ( cd ".libs" && rm -f "libmp3lame.la" && ln -s "../libmp3lame.la" "libmp3lame.la" )
+make[3]: Leaving directory '/build/lame-3.100/libmp3lame'
+make[2]: Leaving directory '/build/lame-3.100/libmp3lame'
+Making all in frontend
+make[2]: Entering directory '/build/lame-3.100/frontend'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/build/lame-3.100/frontend'
+Making all in Dll
+make[2]: Entering directory '/build/lame-3.100/Dll'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/build/lame-3.100/Dll'
+Making all in doc
+make[2]: Entering directory '/build/lame-3.100/doc'
+Making all in html
+make[3]: Entering directory '/build/lame-3.100/doc/html'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/doc/html'
+Making all in man
+make[3]: Entering directory '/build/lame-3.100/doc/man'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/doc/man'
+make[3]: Entering directory '/build/lame-3.100/doc'
+make[3]: Nothing to be done for 'all-am'.
+make[3]: Leaving directory '/build/lame-3.100/doc'
+make[2]: Leaving directory '/build/lame-3.100/doc'
+Making all in include
+make[2]: Entering directory '/build/lame-3.100/include'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/build/lame-3.100/include'
+Making all in misc
+make[2]: Entering directory '/build/lame-3.100/misc'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/build/lame-3.100/misc'
+Making all in dshow
+make[2]: Entering directory '/build/lame-3.100/dshow'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/build/lame-3.100/dshow'
+Making all in ACM
+make[2]: Entering directory '/build/lame-3.100/ACM'
+Making all in ADbg
+make[3]: Entering directory '/build/lame-3.100/ACM/ADbg'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/ACM/ADbg'
+Making all in ddk
+make[3]: Entering directory '/build/lame-3.100/ACM/ddk'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/ACM/ddk'
+Making all in tinyxml
+make[3]: Entering directory '/build/lame-3.100/ACM/tinyxml'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/ACM/tinyxml'
+make[3]: Entering directory '/build/lame-3.100/ACM'
+make[3]: Nothing to be done for 'all-am'.
+make[3]: Leaving directory '/build/lame-3.100/ACM'
+make[2]: Leaving directory '/build/lame-3.100/ACM'
+Making all in mac
+make[2]: Entering directory '/build/lame-3.100/mac'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/build/lame-3.100/mac'
+Making all in macosx
+make[2]: Entering directory '/build/lame-3.100/macosx'
+Making all in English.lproj
+make[3]: Entering directory '/build/lame-3.100/macosx/English.lproj'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/macosx/English.lproj'
+Making all in LAME.xcodeproj
+make[3]: Entering directory '/build/lame-3.100/macosx/LAME.xcodeproj'
+make[3]: Nothing to be done for 'all'.
+make[3]: Leaving directory '/build/lame-3.100/macosx/LAME.xcodeproj'
+make[3]: Entering directory '/build/lame-3.100/macosx'
+make[3]: Nothing to be done for 'all-am'.
+make[3]: Leaving directory '/build/lame-3.100/macosx'
+make[2]: Leaving directory '/build/lame-3.100/macosx'
+Making all in vc_solution
+make[2]: Entering directory '/build/lame-3.100/vc_solution'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/build/lame-3.100/vc_solution'
+make[2]: Entering directory '/build/lame-3.100'
+make[2]: Leaving directory '/build/lame-3.100'
+make[1]: Leaving directory '/build/lame-3.100'
++ make install
++ cd /build
++ sha256sum /build/lame/lib/libmp3lame.a
++ awk '{print $1}'
++ LAME_LIB_SHA256=dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e
++ echo 'LAME 静态库 SHA256（aarch64）: dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e'
+LAME 静态库 SHA256（aarch64）: dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e
++ '[' -z dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e ]
++ '[' dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e '!=' dedef19a16c1712fc02ee2ff2c33828e1904fbd751d9d70e1e402f22fd43828e ]
++ echo 'OK：LAME 静态库哈希与 aarch64 已验证参考值一致'
+OK：LAME 静态库哈希与 aarch64 已验证参考值一致
++ echo '===== [3] 构建 FFmpeg 7.0.2 ====='
+===== [3] 构建 FFmpeg 7.0.2 =====
++ tar -xJf ffmpeg-7.0.2.tar.xz
++ cd ffmpeg-7.0.2
++ ./configure '--prefix=/build/out' --disable-debug --disable-doc --disable-ffplay '--disable-indev=sndio' '--disable-outdev=sndio' '--disable-indev=v4l2' '--disable-outdev=v4l2' '--disable-indev=fbdev' '--disable-outdev=fbdev' --enable-libmp3lame --disable-shared --enable-static '--extra-cflags=-I/build/lame/include' '--extra-ldflags=-static -L/build/lame/lib' '--cc=gcc'
+...
++ cat /build/logs/ffmpeg-configure.log
+install prefix            /build/out
+source path               .
+C compiler                gcc
+C library                 
+ARCH                      aarch64 (generic)
+big-endian                no
+runtime cpu detection     yes
+NEON enabled              yes
+DOTPROD enabled           yes
+I8MM enabled              yes
+debug symbols             no
+strip symbols             yes
+optimize for size         no
+optimizations             yes
+static                    yes
+shared                    no
+postprocessing support    no
+network support           yes
+threading support         pthreads
+safe bitstream reader     yes
+texi2html enabled         no
+perl enabled              no
+pod2man enabled           no
+makeinfo enabled          no
+makeinfo supports HTML    no
+xmllint enabled           no
+
+External libraries:
+iconv                   libmp3lame
+
+External libraries providing hardware acceleration:
+v4l2_m2m
+
+Libraries:
+avcodec                 avformat                swscale
+avdevice                avutil
+avfilter                swresample
+
+Programs:
+ffmpeg                  ffprobe
+
+Enabled decoders:
+aac                     fic                     pfm
+aac_fixed               fits                    pgm
+aac_latm                flac                    pgmyuv
+aasc                    flic                    pgssub
+ac3                     flv                     pgx
+ac3_fixed               fmvc                    phm
+acelp_kelvin            fourxm                  photocd
+adpcm_4xm               fraps                   pictor
+adpcm_adx               frwu                    pixlet
+adpcm_afc               ftr                     pjs
+adpcm_agm               g723_1                  ppm
+adpcm_aica              g729                    prores
+adpcm_argo              gdv                     prosumer
+adpcm_ct                gem                     psd
+adpcm_dtk               gif                     ptx
+adpcm_ea                gremlin_dpcm            qcelp
+adpcm_ea_maxis_xa       gsm                     qdm2
+adpcm_ea_r1             gsm_ms                  qdmc
+adpcm_ea_r2             h261                    qdraw
+adpcm_ea_r3             h263                    qoa
+adpcm_ea_xas            h263_v4l2m2m            qoi
+adpcm_g722              h263i                   qpeg
+adpcm_g726              h263p                   qtrle
+adpcm_g726le            h264                    r10k
+adpcm_ima_acorn         h264_v4l2m2m            r210
+adpcm_ima_alp           hap                     ra_144
+adpcm_ima_amv           hca                     ra_288
+adpcm_ima_apc           hcom                    ralf
+adpcm_ima_apm           hdr                     rawvideo
+adpcm_ima_cunning       hevc                    realtext
+adpcm_ima_dat4          hevc_v4l2m2m            rka
+adpcm_ima_dk3           hnm4_video              rl2
+adpcm_ima_dk4           hq_hqa                  roq
+adpcm_ima_ea_eacs       hqx                     roq_dpcm
+adpcm_ima_ea_sead       huffyuv                 rpza
+adpcm_ima_iss           hymt                    rtv1
+adpcm_ima_moflex        iac                     rv10
+adpcm_ima_mtf           idcin                   rv20
+adpcm_ima_oki           idf                     rv30
+adpcm_ima_qt            iff_ilbm                rv40
+adpcm_ima_rad           ilbc                    s302m
+adpcm_ima_smjpeg        imc                     sami
+adpcm_ima_ssi           imm4                    sanm
+adpcm_ima_wav           imm5                    sbc
+adpcm_ima_ws            indeo2                  scpr
+adpcm_ms                indeo3                  sdx2_dpcm
+adpcm_mtaf              indeo4                  sga
+adpcm_psx               indeo5                  sgi
+adpcm_sbpro_2           interplay_acm           sgirle
+adpcm_sbpro_3           interplay_dpcm          sheervideo
+adpcm_sbpro_4           interplay_video         shorten
+adpcm_swf               ipu                     simbiosis_imx
+adpcm_thp               jacosub                 sipr
+adpcm_thp_le            jpeg2000                siren
+adpcm_vima              jpegls                  smackaud
+adpcm_xa                jv                      smacker
+adpcm_xmd               kgv1                    smc
+adpcm_yamaha            kmvc                    smvjpeg
+adpcm_zork              lagarith                snow
+agm                     lead                    sol_dpcm
+aic                     loco                    sonic
+alac                    m101                    sp5x
+alias_pix               mace3                   speedhq
+als                     mace6                   speex
+amrnb                   magicyuv                srt
+amrwb                   mdec                    ssa
+amv                     media100                stl
+anm                     metasound               subrip
+ansi                    microdvd                subviewer
+anull                   mimic                   subviewer1
+apac                    misc4                   sunrast
+ape                     mjpeg                   svq1
+aptx                    mjpegb                  svq3
+aptx_hd                 mlp                     tak
+arbc                    mmvideo                 targa
+argo                    mobiclip                targa_y216
+ass                     motionpixels            text
+asv1                    movtext                 theora
+asv2                    mp1                     thp
+atrac1                  mp1float                tiertexseqvideo
+atrac3                  mp2                     tiff
+atrac3al                mp2float                tmv
+atrac3p                 mp3                     truehd
+atrac3pal               mp3adu                  truemotion1
+atrac9                  mp3adufloat             truemotion2
+aura                    mp3float                truemotion2rt
+aura2                   mp3on4                  truespeech
+av1                     mp3on4float             tscc2
+avrn                    mpc7                    tta
+avrp                    mpc8                    twinvq
+avs                     mpeg1_v4l2m2m           txd
+avui                    mpeg1video              ulti
+bethsoftvid             mpeg2_v4l2m2m           utvideo
+bfi                     mpeg2video              v210
+bink                    mpeg4                   v210x
+binkaudio_dct           mpeg4_v4l2m2m           v308
+binkaudio_rdft          mpegvideo               v408
+bintext                 mpl2                    v410
+bitpacked               msa1                    vb
+bmp                     msmpeg4v1               vble
+bmv_audio               msmpeg4v2               vbn
+bmv_video               msmpeg4v3               vc1
+bonk                    msnsiren                vc1_v4l2m2m
+brender_pix             msp2                    vc1image
+c93                     msrle                   vcr1
+cavs                    mss1                    vmdaudio
+cbd2_dpcm               mss2                    vmdvideo
+ccaption                msvideo1                vmix
+cdgraphics              mszh                    vmnc
+cdtoons                 mts2                    vnull
+cdxl                    mv30                    vorbis
+cfhd                    mvc1                    vp3
+cinepak                 mvc2                    vp4
+clearvideo              mvdv                    vp5
+cljr                    mxpeg                   vp6
+cllc                    nellymoser              vp6a
+comfortnoise            notchlc                 vp6f
+cook                    nuv                     vp7
+cpia                    on2avc                  vp8
+cri                     opus                    vp8_v4l2m2m
+cscd                    osq                     vp9
+cyuv                    paf_audio               vp9_v4l2m2m
+dca                     paf_video               vplayer
+dds                     pam                     vqa
+derf_dpcm               pbm                     vqc
+dfa                     pcm_alaw                vvc
+dfpwm                   pcm_bluray              wady_dpcm
+dirac                   pcm_dvd                 wavarc
+dnxhd                   pcm_f16le               wavpack
+dolby_e                 pcm_f24le               wbmp
+dpx                     pcm_f32be               webp
+dsd_lsbf                pcm_f32le               webvtt
+dsd_lsbf_planar         pcm_f64be               wmalossless
+dsd_msbf                pcm_f64le               wmapro
+dsd_msbf_planar         pcm_lxf                 wmav1
+dsicinaudio             pcm_mulaw               wmav2
+dsicinvideo             pcm_s16be               wmavoice
+dss_sp                  pcm_s16be_planar        wmv1
+dst                     pcm_s16le               wmv2
+dvaudio                 pcm_s16le_planar        wmv3
+dvbsub                  pcm_s24be               wmv3image
+dvdsub                  pcm_s24daud             wnv1
+dvvideo                 pcm_s24le               wrapped_avframe
+dxtory                  pcm_s24le_planar        ws_snd1
+dxv                     pcm_s32be               xan_dpcm
+eac3                    pcm_s32le               xan_wc3
+eacmv                   pcm_s32le_planar        xan_wc4
+eamad                   pcm_s64be               xbin
+eatgq                   pcm_s64le               xbm
+eatgv                   pcm_s8                  xface
+eatqi                   pcm_s8_planar           xl
+eightbps                pcm_sga                 xma1
+eightsvx_exp            pcm_u16be               xma2
+eightsvx_fib            pcm_u16le               xpm
+escape124               pcm_u24be               xsub
+escape130               pcm_u24le               xwd
+evrc                    pcm_u32be               y41p
+fastaudio               pcm_u32le               ylc
+ffv1                    pcm_u8                  yop
+ffvhuff                 pcm_vidc                yuv4
+ffwavesynth             pcx                     zero12v
+
+Enabled encoders:
+a64multi                hevc_v4l2m2m            phm
+a64multi5               huffyuv                 ppm
+aac                     jpeg2000                prores
+ac3                     jpegls                  prores_aw
+ac3_fixed               libmp3lame              prores_ks
+adpcm_adx               ljpeg                   qoi
+adpcm_argo              magicyuv                qtrle
+adpcm_g722              mjpeg                   r10k
+adpcm_g726              mlp                     r210
+adpcm_g726le            movtext                 ra_144
+adpcm_ima_alp           mp2                     rawvideo
+adpcm_ima_amv           mp2fixed                roq
+adpcm_ima_apm           mpeg1video              roq_dpcm
+adpcm_ima_qt            mpeg2video              rpza
+adpcm_ima_ssi           mpeg4                   rv10
+adpcm_ima_wav           mpeg4_v4l2m2m           rv20
+adpcm_ima_ws            msmpeg4v2               s302m
+adpcm_ms                msmpeg4v3               sbc
+adpcm_swf               msrle                   sgi
+adpcm_yamaha            msvideo1                smc
+alac                    nellymoser              snow
+alias_pix               opus                    sonic
+amv                     pam                     sonic_ls
+anull                   pbm                     speedhq
+aptx                    pcm_alaw                srt
+aptx_hd                 pcm_bluray              ssa
+ass                     pcm_dvd                 subrip
+asv1                    pcm_f32be               sunrast
+asv2                    pcm_f32le               svq1
+avrp                    pcm_f64be               targa
+avui                    pcm_f64le               text
+bitpacked               pcm_mulaw               tiff
+bmp                     pcm_s16be               truehd
+cfhd                    pcm_s16be_planar        tta
+cinepak                 pcm_s16le               ttml
+cljr                    pcm_s16le_planar        utvideo
+comfortnoise            pcm_s24be               v210
+dca                     pcm_s24daud             v308
+dfpwm                   pcm_s24le               v408
+dnxhd                   pcm_s24le_planar        v410
+dpx                     pcm_s32be               vbn
+dvbsub                  pcm_s32le               vc2
+dvdsub                  pcm_s32le_planar        vnull
+dvvideo                 pcm_s64be               vorbis
+dxv                     pcm_s64le               vp8_v4l2m2m
+eac3                    pcm_s8                  wavpack
+ffv1                    pcm_s8_planar           wbmp
+ffvhuff                 pcm_u16be               webvtt
+fits                    pcm_u16le               wmav1
+flac                    pcm_u24be               wmav2
+flv                     pcm_u24le               wmv1
+g723_1                  pcm_u32be               wmv2
+gif                     pcm_u32le               wrapped_avframe
+h261                    pcm_u8                  xbm
+h263                    pcm_vidc                xface
+h263_v4l2m2m            pcx                     xsub
+h263p                   pfm                     xwd
+h264_v4l2m2m            pgm                     y41p
+hdr                     pgmyuv                  yuv4
+
+Enabled hwaccels:
+
+Enabled parsers:
+aac                     dvdsub                  mpegaudio
+aac_latm                evc                     mpegvideo
+ac3                     flac                    opus
+adx                     ftr                     png
+amr                     g723_1                  pnm
+av1                     g729                    qoi
+avs2                    gif                     rv34
+avs3                    gsm                     sbc
+bmp                     h261                    sipr
+cavsvideo               h263                    tak
+cook                    h264                    vc1
+cri                     hdr                     vorbis
+dca                     hevc                    vp3
+dirac                   ipu                     vp8
+dnxhd                   jpeg2000                vp9
+dolby_e                 jpegxl                  vvc
+dpx                     misc4                   webp
+dvaudio                 mjpeg                   xbm
+dvbsub                  mlp                     xma
+dvd_nav                 mpeg4video              xwd
+
+Enabled demuxers:
+aa                      idf                     pcm_s16le
+aac                     iff                     pcm_s24be
+aax                     ifv                     pcm_s24le
+ac3                     ilbc                    pcm_s32be
+ac4                     image2                  pcm_s32le
+ace                     image2_alias_pix        pcm_s8
+acm                     image2_brender_pix      pcm_u16be
+act                     image2pipe              pcm_u16le
+adf                     image_bmp_pipe          pcm_u24be
+adp                     image_cri_pipe          pcm_u24le
+ads                     image_dds_pipe          pcm_u32be
+adx                     image_dpx_pipe          pcm_u32le
+aea                     image_exr_pipe          pcm_u8
+afc                     image_gem_pipe          pcm_vidc
+aiff                    image_gif_pipe          pdv
+aix                     image_hdr_pipe          pjs
+alp                     image_j2k_pipe          pmp
+amr                     image_jpeg_pipe         pp_bnk
+amrnb                   image_jpegls_pipe       pva
+amrwb                   image_jpegxl_pipe       pvf
+anm                     image_pam_pipe          qcp
+apac                    image_pbm_pipe          qoa
+apc                     image_pcx_pipe          r3d
+ape                     image_pfm_pipe          rawvideo
+apm                     image_pgm_pipe          realtext
+apng                    image_pgmyuv_pipe       redspark
+aptx                    image_pgx_pipe          rka
+aptx_hd                 image_phm_pipe          rl2
+aqtitle                 image_photocd_pipe      rm
+argo_asf                image_pictor_pipe       roq
+argo_brp                image_png_pipe          rpl
+argo_cvg                image_ppm_pipe          rsd
+asf                     image_psd_pipe          rso
+asf_o                   image_qdraw_pipe        rtp
+ass                     image_qoi_pipe          rtsp
+ast                     image_sgi_pipe          s337m
+au                      image_sunrast_pipe      sami
+av1                     image_svg_pipe          sap
+avi                     image_tiff_pipe         sbc
+avr                     image_vbn_pipe          sbg
+avs                     image_webp_pipe         scc
+avs2                    image_xbm_pipe          scd
+avs3                    image_xpm_pipe          sdns
+bethsoftvid             image_xwd_pipe          sdp
+bfi                     ingenient               sdr2
+bfstm                   ipmovie                 sds
+bink                    ipu                     sdx
+binka                   ircam                   segafilm
+bintext                 iss                     ser
+bit                     iv8                     sga
+bitpacked               ivf                     shorten
+bmv                     ivr                     siff
+boa                     jacosub                 simbiosis_imx
+bonk                    jpegxl_anim             sln
+brstm                   jv                      smacker
+c93                     kux                     smjpeg
+caf                     kvag                    smush
+cavsvideo               laf                     sol
+cdg                     live_flv                sox
+cdxl                    lmlm4                   spdif
+cine                    loas                    srt
+codec2                  lrc                     stl
+codec2raw               luodat                  str
+concat                  lvf                     subviewer
+data                    lxf                     subviewer1
+daud                    m4v                     sup
+dcstr                   matroska                svag
+derf                    mca                     svs
+dfa                     mcc                     swf
+dfpwm                   mgsts                   tak
+dhav                    microdvd                tedcaptions
+dirac                   mjpeg                   thp
+dnxhd                   mjpeg_2000              threedostr
+dsf                     mlp                     tiertexseq
+dsicin                  mlv                     tmv
+dss                     mm                      truehd
+dts                     mmf                     tta
+dtshd                   mods                    tty
+dv                      moflex                  txd
+dvbsub                  mov                     ty
+dvbtxt                  mp3                     usm
+dxa                     mpc                     v210
+ea                      mpc8                    v210x
+ea_cdata                mpegps                  vag
+eac3                    mpegts                  vc1
+epaf                    mpegtsraw               vc1t
+evc                     mpegvideo               vividas
+ffmetadata              mpjpeg                  vivo
+filmstrip               mpl2                    vmd
+fits                    mpsub                   vobsub
+flac                    msf                     voc
+flic                    msnwc_tcp               vpk
+flv                     msp                     vplayer
+fourxm                  mtaf                    vqf
+frm                     mtv                     vvc
+fsb                     musx                    w64
+fwse                    mv                      wady
+g722                    mvi                     wav
+g723_1                  mxf                     wavarc
+g726                    mxg                     wc3
+g726le                  nc                      webm_dash_manifest
+g729                    nistsphere              webvtt
+gdv                     nsp                     wsaud
+genh                    nsv                     wsd
+gif                     nut                     wsvqa
+gsm                     nuv                     wtv
+gxf                     obu                     wv
+h261                    ogg                     wve
+h263                    oma                     xa
+h264                    osq                     xbin
+hca                     paf                     xmd
+hcom                    pcm_alaw                xmv
+hevc                    pcm_f32be               xvag
+hls                     pcm_f32le               xwma
+hnm                     pcm_f64be               yop
+iamf                    pcm_f64le               yuv4mpegpipe
+ico                     pcm_mulaw
+idcin                   pcm_s16be
+
+Enabled muxers:
+a64                     h263                    pcm_s24be
+ac3                     h264                    pcm_s24le
+ac4                     hash                    pcm_s32be
+adts                    hds                     pcm_s32le
+adx                     hevc                    pcm_s8
+aea                     hls                     pcm_u16be
+aiff                    iamf                    pcm_u16le
+alp                     ico                     pcm_u24be
+amr                     ilbc                    pcm_u24le
+amv                     image2                  pcm_u32be
+apm                     image2pipe              pcm_u32le
+apng                    ipod                    pcm_u8
+aptx                    ircam                   pcm_vidc
+aptx_hd                 ismv                    psp
+argo_asf                ivf                     rawvideo
+argo_cvg                jacosub                 rcwt
+asf                     kvag                    rm
+asf_stream              latm                    roq
+ass                     lrc                     rso
+ast                     m4v                     rtp
+au                      matroska                rtp_mpegts
+avi                     matroska_audio          rtsp
+avif                    md5                     sap
+avm2                    microdvd                sbc
+avs2                    mjpeg                   scc
+avs3                    mkvtimestamp_v2         segafilm
+bit                     mlp                     segment
+caf                     mmf                     smjpeg
+cavsvideo               mov                     smoothstreaming
+codec2                  mp2                     sox
+codec2raw               mp3                     spdif
+crc                     mp4                     spx
+dash                    mpeg1system             srt
+data                    mpeg1vcd                stream_segment
+daud                    mpeg1video              streamhash
+dfpwm                   mpeg2dvd                sup
+dirac                   mpeg2svcd               swf
+dnxhd                   mpeg2video              tee
+dts                     mpeg2vob                tg2
+dv                      mpegts                  tgp
+eac3                    mpjpeg                  truehd
+evc                     mxf                     tta
+f4v                     mxf_d10                 ttml
+ffmetadata              mxf_opatom              uncodedframecrc
+fifo                    null                    vc1
+filmstrip               nut                     vc1t
+fits                    obu                     voc
+flac                    oga                     vvc
+flv                     ogg                     w64
+framecrc                ogv                     wav
+framehash               oma                     webm
+framemd5                opus                    webm_chunk
+g722                    pcm_alaw                webm_dash_manifest
+g723_1                  pcm_f32be               webp
+g726                    pcm_f32le               webvtt
+g726le                  pcm_f64be               wsaud
+gif                     pcm_f64le               wtv
+gsm                     pcm_mulaw               wv
+gxf                     pcm_s16be               yuv4mpegpipe
+h261                    pcm_s16le
+
+Enabled protocols:
+async                   gopher                  rtmp
+cache                   hls                     rtmpt
+concat                  http                    rtp
+concatf                 httpproxy               srtp
+crypto                  icecast                 subfile
+data                    md5                     tcp
+fd                      mmsh                    tee
+ffrtmphttp              mmst                    udp
+file                    pipe                    udplite
+ftp                     prompeg                 unix
+
+Enabled filters:
+a3dscope                colortemperature        nlmeans
+aap                     compand                 noformat
+abench                  compensationdelay       noise
+abitscope               concat                  normalize
+acompressor             convolution             null
+acontrast               convolve                nullsink
+acopy                   copy                    nullsrc
+acrossfade              corr                    oscilloscope
+acrossover              crop                    overlay
+acrusher                crossfeed               pad
+acue                    crystalizer             pal100bars
+addroi                  cue                     pal75bars
+adeclick                curves                  palettegen
+adeclip                 datascope               paletteuse
+adecorrelate            dblur                   pan
+adelay                  dcshift                 perms
+adenorm                 dctdnoiz                photosensitivity
+aderivative             deband                  pixdesctest
+adrawgraph              deblock                 pixelize
+adrc                    decimate                pixscope
+adynamicequalizer       deconvolve              premultiply
+adynamicsmooth          dedot                   prewitt
+aecho                   deesser                 pseudocolor
+aemphasis               deflate                 psnr
+aeval                   deflicker               qp
+aevalsrc                dejudder                random
+aexciter                derain                  readeia608
+afade                   deshake                 readvitc
+afdelaysrc              despill                 realtime
+afftdn                  detelecine              remap
+afftfilt                dialoguenhance          removegrain
+afir                    dilation                removelogo
+afireqsrc               displace                replaygain
+afirsrc                 dnn_classify            reverse
+aformat                 dnn_detect              rgbashift
+afreqshift              dnn_processing          rgbtestsrc
+afwtdn                  doubleweave             roberts
+agate                   drawbox                 rotate
+agraphmonitor           drawgraph               scale
+ahistogram              drawgrid                scale2ref
+aiir                    drmeter                 scdet
+aintegral               dynaudnorm              scharr
+ainterleave             earwax                  scroll
+alatency                ebur128                 segment
+alimiter                edgedetect              select
+allpass                 elbg                    selectivecolor
+allrgb                  entropy                 sendcmd
+allyuv                  epx                     separatefields
+aloop                   equalizer               setdar
+alphaextract            erosion                 setfield
+alphamerge              estdif                  setparams
+amerge                  exposure                setpts
+ametadata               extractplanes           setrange
+amix                    extrastereo             setsar
+amovie                  fade                    settb
+amplify                 feedback                shear
+amultiply               fftdnoiz                showcqt
+anequalizer             fftfilt                 showcwt
+anlmdn                  field                   showfreqs
+anlmf                   fieldhint               showinfo
+anlms                   fieldmatch              showpalette
+anoisesrc               fieldorder              showspatial
+anull                   fillborders             showspectrum
+anullsink               firequalizer            showspectrumpic
+anullsrc                flanger                 showvolume
+apad                    floodfill               showwaves
+aperms                  format                  showwavespic
+aphasemeter             fps                     shuffleframes
+aphaser                 framepack               shufflepixels
+aphaseshift             framerate               shuffleplanes
+apsnr                   framestep               sidechaincompress
+apsyclip                freezedetect            sidechaingate
+apulsator               freezeframes            sidedata
+arealtime               fsync                   sierpinski
+aresample               gblur                   signalstats
+areverse                geq                     silencedetect
+arls                    gradfun                 silenceremove
+arnndn                  gradients               sinc
+asdr                    graphmonitor            sine
+asegment                grayworld               siti
+aselect                 greyedge                smptebars
+asendcmd                guided                  smptehdbars
+asetnsamples            haas                    sobel
+asetpts                 haldclut                spectrumsynth
+asetrate                haldclutsrc             speechnorm
+asettb                  hdcd                    split
+ashowinfo               headphone               sr
+asidedata               hflip                   ssim
+asisdr                  highpass                ssim360
+asoftclip               highshelf               stereotools
+aspectralstats          hilbert                 stereowiden
+asplit                  histogram               streamselect
+astats                  hqx                     superequalizer
+astreamselect           hstack                  surround
+asubboost               hsvhold                 swaprect
+asubcut                 hsvkey                  swapuv
+asupercut               hue                     tblend
+asuperpass              huesaturation           telecine
+asuperstop              hwdownload              testsrc
+atadenoise              hwmap                   testsrc2
+atempo                  hwupload                thistogram
+atilt                   hysteresis              threshold
+atrim                   identity                thumbnail
+avectorscope            idet                    tile
+avgblur                 il                      tiltandshift
+avsynctest              inflate                 tiltshelf
+axcorrelate             interleave              tlut2
+backgroundkey           join                    tmedian
+bandpass                kirsch                  tmidequalizer
+bandreject              lagfun                  tmix
+bass                    latency                 tonemap
+bbox                    lenscorrection          tpad
+bench                   life                    transpose
+bilateral               limitdiff               treble
+biquad                  limiter                 tremolo
+bitplanenoise           loop                    trim
+blackdetect             loudnorm                unpremultiply
+blend                   lowpass                 unsharp
+blockdetect             lowshelf                untile
+blurdetect              lumakey                 v360
+bm3d                    lut                     varblur
+bwdif                   lut1d                   vectorscope
+cas                     lut2                    vflip
+ccrepack                lut3d                   vfrdet
+cellauto                lutrgb                  vibrance
+channelmap              lutyuv                  vibrato
+channelsplit            mandelbrot              vif
+chorus                  maskedclamp             vignette
+chromahold              maskedmax               virtualbass
+chromakey               maskedmerge             vmafmotion
+chromanr                maskedmin               volume
+chromashift             maskedthreshold         volumedetect
+ciescope                maskfun                 vstack
+codecview               mcompand                w3fdif
+color                   median                  waveform
+colorbalance            mergeplanes             weave
+colorchannelmixer       mestimate               xbr
+colorchart              metadata                xcorrelate
+colorcontrast           midequalizer            xfade
+colorcorrect            minterpolate            xmedian
+colorhold               mix                     xstack
+colorize                monochrome              yadif
+colorkey                morpho                  yaepblur
+colorlevels             movie                   yuvtestsrc
+colormap                msad                    zoneplate
+colorspace              multiply                zoompan
+colorspectrum           negate
+
+Enabled bsfs:
+aac_adtstoasc           h2+ grep -q '^License: LGPL' /build/logs/ffmpeg-configure.log
+64_redundant_pps      pgs_frame_merge
+av1_frame_merge         hapqa_extract           prores_metadata
+av1_frame_split         hevc_metadata           remove_extradata
+av1_metadata            hevc_mp4toannexb        setts
+chomp                   imx_dump_header         showinfo
+dca_core                media100_to_mjpegb      text2movsub
+dts2pts                 mjpeg2jpeg              trace_headers
+dump_extradata          mjpega_dump_header      truehd_core
+dv_error_marker         mov2textsub             vp9_metadata
+eac3_core               mpeg2_metadata          vp9_raw_reorder
+evc_frame_merge         mpeg4_unpack_bframes    vp9_superframe
+extract_extradata       noise                   vp9_superframe_split
+filter_units            null                    vvc_metadata
+h264_metadata           opus_metadata           vvc_mp4toannexb
+h264_mp4toannexb        pcm_rechunk
+
+Enabled indevs:
+lavfi                   oss
+
+Enabled outdevs:
+oss
+
+License: LGPL version 2.1 or later
++ nproc
++ make -j12
+GEN	libavdevice/libavdevice.version
+GEN	libavfilter/libavfilter.version
+GEN	libavformat/libavformat.version
+GEN	libavcodec/libavcodec.version
+GEN	libswresample/libswresample.version
+GEN	libswscale/libswscale.version
+GEN	libavutil/libavutil.version
+CC	libavdevice/alldevices.o
+CC	libavdevice/avdevice.o
+CC	libavdevice/lavfi.o
+CC	libavdevice/oss.o
+CC	libavdevice/oss_dec.o
+CC	libavdevice/oss_enc.o
+CC	libavdevice/utils.o
+CC	libavdevice/version.o
+GEN	libavdevice/libavdevice.pc
+CC	libavfilter/aarch64/vf_bwdif_init_aarch64.o
+AS	libavfilter/aarch64/vf_bwdif_neon.o
+CC	libavfilter/aarch64/vf_nlmeans_init.o
+AS	libavfilter/aarch64/vf_nlmeans_neon.o
+CC	libavfilter/aeval.o
+CC	libavfilter/af_aap.o
+CC	libavfilter/af_acontrast.o
+CC	libavfilter/af_acopy.o
+CC	libavfilter/af_acrossover.o
+CC	libavfilter/af_adeclick.o
+CC	libavfilter/af_acrusher.o
+CC	libavfilter/af_adecorrelate.o
+CC	libavfilter/af_adelay.o
+CC	libavfilter/af_adenorm.o
+CC	libavfilter/af_aderivative.o
+CC	libavfilter/af_adrc.o
+CC	libavfilter/af_adynamicequalizer.o
+CC	libavfilter/af_adynamicsmooth.o
+CC	libavfilter/af_aecho.o
+CC	libavfilter/af_aemphasis.o
+CC	libavfilter/af_aexciter.o
+CC	libavfilter/af_afade.o
+CC	libavfilter/af_afftdn.o
+CC	libavfilter/af_afftfilt.o
+CC	libavfilter/af_afir.o
+CC	libavfilter/af_aformat.o
+CC	libavfilter/af_afreqshift.o
+CC	libavfilter/af_afwtdn.o
+CC	libavfilter/af_agate.o
+CC	libavfilter/af_aiir.o
+CC	libavfilter/af_alimiter.o
+CC	libavfilter/af_amerge.o
+CC	libavfilter/af_amix.o
+CC	libavfilter/af_amultiply.o
+CC	libavfilter/af_anequalizer.o
+CC	libavfilter/af_anlmdn.o
+CC	libavfilter/af_anlms.o
+CC	libavfilter/af_anull.o
+CC	libavfilter/af_apad.o
+CC	libavfilter/af_aphaser.o
+CC	libavfilter/af_apsyclip.o
+CC	libavfilter/af_apulsator.o
+CC	libavfilter/af_aresample.o
+CC	libavfilter/af_arls.o
+CC	libavfilter/af_arnndn.o
+CC	libavfilter/af_asdr.o
+CC	libavfilter/af_asetnsamples.o
+CC	libavfilter/af_asetrate.o
+CC	libavfilter/af_ashowinfo.o
+CC	libavfilter/af_asoftclip.o
+CC	libavfilter/af_aspectralstats.o
+CC	libavfilter/af_astats.o
+CC	libavfilter/af_asubboost.o
+CC	libavfilter/af_asupercut.o
+CC	libavfilter/af_atempo.o
+CC	libavfilter/af_atilt.o
+CC	libavfilter/af_axcorrelate.o
+CC	libavfilter/af_biquads.o
+CC	libavfilter/af_channelmap.o
+CC	libavfilter/af_channelsplit.o
+libavfilter/af_channelsplit.c: In function 'filter_frame':
+libavfilter/af_channelsplit.c:161:5: warning: ISO C90 forbids mixed declarations and code [-Wdeclaration-after-statement]
+  161 |     AVFrame *buf_out = av_frame_clone(buf);
+      |     ^~~~~~~
+CC	libavfilter/af_chorus.o
+CC	libavfilter/af_compand.o
+CC	libavfilter/af_compensationdelay.o
+CC	libavfilter/af_crossfeed.o
+CC	libavfilter/af_crystalizer.o
+CC	libavfilter/af_dcshift.o
+CC	libavfilter/af_deesser.o
+CC	libavfilter/af_dialoguenhance.o
+CC	libavfilter/af_drmeter.o
+CC	libavfilter/af_dynaudnorm.o
+CC	libavfilter/af_earwax.o
+CC	libavfilter/af_extrastereo.o
+CC	libavfilter/af_firequalizer.o
+CC	libavfilter/af_flanger.o
+CC	libavfilter/af_haas.o
+CC	libavfilter/af_hdcd.o
+CC	libavfilter/af_headphone.o
+CC	libavfilter/af_join.o
+CC	libavfilter/af_loudnorm.o
+CC	libavfilter/af_mcompand.o
+CC	libavfilter/af_pan.o
+CC	libavfilter/af_replaygain.o
+CC	libavfilter/af_sidechaincompress.o
+CC	libavfilter/af_silencedetect.o
+CC	libavfilter/af_silenceremove.o
+CC	libavfilter/af_speechnorm.o
+In file included from ./libavutil/common.h:40,
+                 from ./libavutil/avutil.h:301,
+                 from ./libavutil/opt.h:31,
+                 from libavfilter/af_firequalizer.c:23:
+In function 'memset',
+    inlined from 'generate_min_phase_kernel' at libavfilter/af_firequalizer.c:558:5,
+    inlined from 'generate_kernel' at libavfilter/af_firequalizer.c:690:13:
+/usr/include/fortify/string.h:75:16: warning: '__builtin_memset' specified bound between 18446744069414584316 and 18446744073709551608 exceeds maximum object size 9223372036854775807 [-Wstringop-overflow=]
+   75 |         return __builtin_memset(__d, __c, __n);
+      |                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CC	libavfilter/af_stereotools.o
+CC	libavfilter/af_stereowiden.o
+CC	libavfilter/af_superequalizer.o
+CC	libavfilter/af_surround.o
+CC	libavfilter/af_tremolo.o
+CC	libavfilter/af_vibrato.o
+CC	libavfilter/af_virtualbass.o
+CC	libavfilter/af_volume.o
+CC	libavfilter/af_volumedetect.o
+CC	libavfilter/allfilters.o
+CC	libavfilter/asink_anullsink.o
+CC	libavfilter/asrc_afdelaysrc.o
+CC	libavfilter/asrc_afirsrc.o
+CC	libavfilter/asrc_anoisesrc.o
+CC	libavfilter/asrc_anullsrc.o
+CC	libavfilter/asrc_hilbert.o
+CC	libavfilter/asrc_sinc.o
+CC	libavfilter/asrc_sine.o
+CC	libavfilter/audio.o
+CC	libavfilter/avf_a3dscope.o
+CC	libavfilter/avf_abitscope.o
+CC	libavfilter/avf_ahistogram.o
+CC	libavfilter/avf_aphasemeter.o
+CC	libavfilter/avf_avectorscope.o
+CC	libavfilter/avf_concat.o
+CC	libavfilter/avf_showcqt.o
+CC	libavfilter/avf_showcwt.o
+CC	libavfilter/avf_showfreqs.o
+CC	libavfilter/avf_showspatial.o
+CC	libavfilter/avf_showspectrum.o
+CC	libavfilter/avf_showvolume.o
+CC	libavfilter/avf_showwaves.o
+CC	libavfilter/avfilter.o
+CC	libavfilter/avfiltergraph.o
+CC	libavfilter/bbox.o
+CC	libavfilter/buffersink.o
+CC	libavfilter/buffersrc.o
+CC	libavfilter/bwdifdsp.o
+CC	libavfilter/ccfifo.o
+CC	libavfilter/colorspace.o
+CC	libavfilter/colorspacedsp.o
+CC	libavfilter/dnn/dnn_backend_common.o
+CC	libavfilter/dnn/dnn_interface.o
+CC	libavfilter/dnn/dnn_io_proc.o
+CC	libavfilter/dnn/queue.o
+CC	libavfilter/dnn/safe_queue.o
+CC	libavfilter/dnn_filter_common.o
+CC	libavfilter/drawutils.o
+CC	libavfilter/ebur128.o
+CC	libavfilter/edge_common.o
+CC	libavfilter/f_bench.o
+CC	libavfilter/f_cue.o
+CC	libavfilter/f_drawgraph.o
+CC	libavfilter/f_ebur128.o
+CC	libavfilter/f_graphmonitor.o
+CC	libavfilter/f_interleave.o
+CC	libavfilter/f_latency.o
+CC	libavfilter/f_loop.o
+CC	libavfilter/f_metadata.o
+CC	libavfilter/f_perms.o
+CC	libavfilter/f_realtime.o
+CC	libavfilter/f_reverse.o
+CC	libavfilter/f_segment.o
+CC	libavfilter/f_select.o
+CC	libavfilter/f_sendcmd.o
+CC	libavfilter/f_sidedata.o
+CC	libavfilter/f_streamselect.o
+CC	libavfilter/formats.o
+CC	libavfilter/framepool.o
+CC	libavfilter/framequeue.o
+CC	libavfilter/framesync.o
+CC	libavfilter/generate_wave_table.o
+CC	libavfilter/graphdump.o
+CC	libavfilter/graphparser.o
+CC	libavfilter/lavfutils.o
+CC	libavfilter/lswsutils.o
+CC	libavfilter/motion_estimation.o
+CC	libavfilter/palette.o
+CC	libavfilter/pthread.o
+CC	libavfilter/qp_table.o
+CC	libavfilter/scale_eval.o
+CC	libavfilter/scene_sad.o
+CC	libavfilter/setpts.o
+CC	libavfilter/settb.o
+CC	libavfilter/split.o
+CC	libavfilter/src_avsynctest.o
+CC	libavfilter/src_movie.o
+CC	libavfilter/transform.o
+CC	libavfilter/trim.o
+CC	libavfilter/vaf_spectrumsynth.o
+CC	libavfilter/version.o
+CC	libavfilter/vf_addroi.o
+CC	libavfilter/vf_alphamerge.o
+CC	libavfilter/vf_amplify.o
+CC	libavfilter/vf_aspect.o
+CC	libavfilter/vf_atadenoise.o
+CC	libavfilter/vf_avgblur.o
+CC	libavfilter/vf_backgroundkey.o
+CC	libavfilter/vf_bbox.o
+CC	libavfilter/vf_bilateral.o
+CC	libavfilter/vf_bitplanenoise.o
+CC	libavfilter/vf_blackdetect.o
+CC	libavfilter/vf_blend.o
+CC	libavfilter/vf_blockdetect.o
+CC	libavfilter/vf_blurdetect.o
+CC	libavfilter/vf_bm3d.o
+CC	libavfilter/vf_bwdif.o
+CC	libavfilter/vf_cas.o
+CC	libavfilter/vf_ccrepack.o
+CC	libavfilter/vf_chromakey.o
+CC	libavfilter/vf_chromanr.o
+CC	libavfilter/vf_chromashift.o
+CC	libavfilter/vf_ciescope.o
+CC	libavfilter/vf_codecview.o
+CC	libavfilter/vf_colorbalance.o
+CC	libavfilter/vf_colorconstancy.o
+CC	libavfilter/vf_colorchannelmixer.o
+CC	libavfilter/vf_colorcontrast.o
+CC	libavfilter/vf_colorcorrect.o
+CC	libavfilter/vf_colorize.o
+CC	libavfilter/vf_colorkey.o
+CC	libavfilter/vf_colorlevels.o
+CC	libavfilter/vf_colormap.o
+CC	libavfilter/vf_colorspace.o
+CC	libavfilter/vf_colortemperature.o
+CC	libavfilter/vf_convolution.o
+CC	libavfilter/vf_convolve.o
+CC	libavfilter/vf_copy.o
+CC	libavfilter/vf_corr.o
+CC	libavfilter/vf_crop.o
+CC	libavfilter/vf_curves.o
+CC	libavfilter/vf_datascope.o
+CC	libavfilter/vf_dblur.o
+CC	libavfilter/vf_dctdnoiz.o
+CC	libavfilter/vf_deband.o
+CC	libavfilter/vf_deblock.o
+CC	libavfilter/vf_decimate.o
+CC	libavfilter/vf_dedot.o
+CC	libavfilter/vf_deflicker.o
+CC	libavfilter/vf_dejudder.o
+CC	libavfilter/vf_derain.o
+CC	libavfilter/vf_deshake.o
+CC	libavfilter/vf_despill.o
+CC	libavfilter/vf_detelecine.o
+CC	libavfilter/vf_displace.o
+CC	libavfilter/vf_dnn_classify.o
+CC	libavfilter/vf_dnn_detect.o
+CC	libavfilter/vf_dnn_processing.o
+CC	libavfilter/vf_drawbox.o
+CC	libavfilter/vf_edgedetect.o
+CC	libavfilter/vf_elbg.o
+CC	libavfilter/vf_entropy.o
+CC	libavfilter/vf_epx.o
+CC	libavfilter/vf_estdif.o
+CC	libavfilter/vf_exposure.o
+CC	libavfilter/vf_extractplanes.o
+CC	libavfilter/vf_fade.o
+CC	libavfilter/vf_feedback.o
+CC	libavfilter/vf_fftdnoiz.o
+CC	libavfilter/vf_fftfilt.o
+CC	libavfilter/vf_field.o
+CC	libavfilter/vf_fieldhint.o
+CC	libavfilter/vf_fieldmatch.o
+CC	libavfilter/vf_fieldorder.o
+CC	libavfilter/vf_fillborders.o
+CC	libavfilter/vf_floodfill.o
+CC	libavfilter/vf_format.o
+CC	libavfilter/vf_fps.o
+CC	libavfilter/vf_framepack.o
+CC	libavfilter/vf_framerate.o
+CC	libavfilter/vf_framestep.o
+CC	libavfilter/vf_freezedetect.o
+CC	libavfilter/vf_freezeframes.o
+CC	libavfilter/vf_fsync.o
+CC	libavfilter/vf_gblur.o
+CC	libavfilter/vf_geq.o
+CC	libavfilter/vf_gradfun.o
+CC	libavfilter/vf_grayworld.o
+CC	libavfilter/vf_guided.o
+CC	libavfilter/vf_hflip.o
+CC	libavfilter/vf_histogram.o
+CC	libavfilter/vf_hqx.o
+CC	libavfilter/vf_hsvkey.o
+CC	libavfilter/vf_hue.o
+CC	libavfilter/vf_huesaturation.o
+CC	libavfilter/vf_hwdownload.o
+CC	libavfilter/vf_hwmap.o
+CC	libavfilter/vf_hwupload.o
+CC	libavfilter/vf_hysteresis.o
+CC	libavfilter/vf_identity.o
+CC	libavfilter/vf_idet.o
+CC	libavfilter/vf_il.o
+CC	libavfilter/vf_lagfun.o
+CC	libavfilter/vf_lenscorrection.o
+CC	libavfilter/vf_limitdiff.o
+CC	libavfilter/vf_limiter.o
+CC	libavfilter/vf_lumakey.o
+CC	libavfilter/vf_lut.o
+CC	libavfilter/vf_lut2.o
+CC	libavfilter/vf_lut3d.o
+CC	libavfilter/vf_maskedclamp.o
+CC	libavfilter/vf_maskedmerge.o
+CC	libavfilter/vf_maskedminmax.o
+CC	libavfilter/vf_maskedthreshold.o
+CC	libavfilter/vf_maskfun.o
+CC	libavfilter/vf_median.o
+CC	libavfilter/vf_mergeplanes.o
+CC	libavfilter/vf_mestimate.o
+CC	libavfilter/vf_midequalizer.o
+CC	libavfilter/vf_minterpolate.o
+CC	libavfilter/vf_mix.o
+CC	libavfilter/vf_monochrome.o
+CC	libavfilter/vf_morpho.o
+CC	libavfilter/vf_multiply.o
+CC	libavfilter/vf_negate.o
+CC	libavfilter/vf_neighbor.o
+CC	libavfilter/vf_nlmeans.o
+CC	libavfilter/vf_noise.o
+CC	libavfilter/vf_normalize.o
+CC	libavfilter/vf_null.o
+CC	libavfilter/vf_overlay.o
+CC	libavfilter/vf_pad.o
+CC	libavfilter/vf_palettegen.o
+CC	libavfilter/vf_paletteuse.o
+CC	libavfilter/vf_photosensitivity.o
+CC	libavfilter/vf_pixdesctest.o
+CC	libavfilter/vf_pixelize.o
+CC	libavfilter/vf_premultiply.o
+CC	libavfilter/vf_pseudocolor.o
+CC	libavfilter/vf_psnr.o
+CC	libavfilter/vf_qp.o
+CC	libavfilter/vf_random.o
+CC	libavfilter/vf_readeia608.o
+CC	libavfilter/vf_readvitc.o
+CC	libavfilter/vf_remap.o
+CC	libavfilter/vf_removegrain.o
+CC	libavfilter/vf_removelogo.o
+CC	libavfilter/vf_rotate.o
+CC	libavfilter/vf_scale.o
+CC	libavfilter/vf_scdet.o
+CC	libavfilter/vf_scroll.o
+CC	libavfilter/vf_selectivecolor.o
+CC	libavfilter/vf_separatefields.o
+CC	libavfilter/vf_setparams.o
+CC	libavfilter/vf_shear.o
+CC	libavfilter/vf_showinfo.o
+CC	libavfilter/vf_showpalette.o
+CC	libavfilter/vf_shuffleframes.o
+CC	libavfilter/vf_shufflepixels.o
+CC	libavfilter/vf_shuffleplanes.o
+CC	libavfilter/vf_signalstats.o
+CC	libavfilter/vf_siti.o
+CC	libavfilter/vf_sr.o
+CC	libavfilter/vf_ssim.o
+CC	libavfilter/vf_ssim360.o
+CC	libavfilter/vf_stack.o
+CC	libavfilter/vf_swaprect.o
+CC	libavfilter/vf_swapuv.o
+CC	libavfilter/vf_telecine.o
+CC	libavfilter/vf_threshold.o
+CC	libavfilter/vf_thumbnail.o
+CC	libavfilter/vf_tile.o
+CC	libavfilter/vf_tiltandshift.o
+CC	libavfilter/vf_tmidequalizer.o
+CC	libavfilter/vf_tonemap.o
+CC	libavfilter/vf_tpad.o
+CC	libavfilter/vf_transpose.o
+CC	libavfilter/vf_unsharp.o
+CC	libavfilter/vf_untile.o
+CC	libavfilter/vf_v360.o
+CC	libavfilter/vf_varblur.o
+CC	libavfilter/vf_vectorscope.o
+CC	libavfilter/vf_vflip.o
+CC	libavfilter/vf_vfrdet.o
+CC	libavfilter/vf_vibrance.o
+CC	libavfilter/vf_vif.o
+CC	libavfilter/vf_vignette.o
+CC	libavfilter/vf_vmafmotion.o
+CC	libavfilter/vf_w3fdif.o
+CC	libavfilter/vf_waveform.o
+CC	libavfilter/vf_weave.o
+CC	libavfilter/vf_xbr.o
+CC	libavfilter/vf_xfade.o
+CC	libavfilter/vf_xmedian.o
+CC	libavfilter/vf_yadif.o
+CC	libavfilter/vf_yaepblur.o
+CC	libavfilter/vf_zoompan.o
+CC	libavfilter/video.o
+CC	libavfilter/vsink_nullsink.o
+CC	libavfilter/vsrc_cellauto.o
+CC	libavfilter/vsrc_gradients.o
+CC	libavfilter/vsrc_life.o
+CC	libavfilter/vsrc_mandelbrot.o
+CC	libavfilter/vsrc_sierpinski.o
+CC	libavfilter/vsrc_testsrc.o
+CC	libavfilter/yadif_common.o
+GEN	libavfilter/libavfilter.pc
+CC	libavformat/3dostr.o
+CC	libavformat/4xm.o
+CC	libavformat/a64.o
+CC	libavformat/aacdec.o
+CC	libavformat/aadec.o
+CC	libavformat/aaxdec.o
+CC	libavformat/ac3dec.o
+CC	libavformat/ac4dec.o
+CC	libavformat/ac4enc.o
+CC	libavformat/acedec.o
+CC	libavformat/acm.o
+CC	libavformat/act.o
+CC	libavformat/adp.o
+CC	libavformat/ads.o
+CC	libavformat/adtsenc.o
+CC	libavformat/adxdec.o
+CC	libavformat/aeadec.o
+CC	libavformat/aeaenc.o
+CC	libavformat/afc.o
+CC	libavformat/aiff.o
+CC	libavformat/aiffdec.o
+CC	libavformat/aiffenc.o
+CC	libavformat/aixdec.o
+CC	libavformat/allformats.o
+CC	libavformat/alp.o
+CC	libavformat/amr.o
+CC	libavformat/amvenc.o
+CC	libavformat/anm.o
+CC	libavformat/apac.o
+CC	libavformat/apc.o
+CC	libavformat/ape.o
+CC	libavformat/apetag.o
+CC	libavformat/apm.o
+CC	libavformat/apngdec.o
+CC	libavformat/apngenc.o
+CC	libavformat/aptxdec.o
+CC	libavformat/aqtitledec.o
+CC	libavformat/argo_asf.o
+CC	libavformat/argo_brp.o
+CC	libavformat/argo_cvg.o
+CC	libavformat/asf.o
+CC	libavformat/asf_tags.o
+CC	libavformat/asfcrypt.o
+CC	libavformat/asfdec_f.o
+CC	libavformat/asfdec_o.o
+CC	libavformat/asfenc.o
+CC	libavformat/assdec.o
+CC	libavformat/assenc.o
+CC	libavformat/ast.o
+CC	libavformat/astdec.o
+CC	libavformat/astenc.o
+CC	libavformat/async.o
+CC	libavformat/au.o
+CC	libavformat/av1.o
+CC	libavformat/av1dec.o
+CC	libavformat/avc.o
+CC	libavformat/avformat.o
+CC	libavformat/avidec.o
+CC	libavformat/avienc.o
+CC	libavformat/avio.o
+CC	libavformat/aviobuf.o
+CC	libavformat/avlanguage.o
+CC	libavformat/avr.o
+CC	libavformat/avs.o
+CC	libavformat/avs2dec.o
+CC	libavformat/avs3dec.o
+CC	libavformat/bethsoftvid.o
+CC	libavformat/bfi.o
+CC	libavformat/bink.o
+CC	libavformat/binka.o
+CC	libavformat/bintext.o
+CC	libavformat/bit.o
+CC	libavformat/bmv.o
+CC	libavformat/boadec.o
+CC	libavformat/bonk.o
+CC	libavformat/brstm.o
+CC	libavformat/c93.o
+CC	libavformat/cache.o
+CC	libavformat/caf.o
+CC	libavformat/cafdec.o
+CC	libavformat/cafenc.o
+CC	libavformat/cavsvideodec.o
+CC	libavformat/cdg.o
+CC	libavformat/cdxl.o
+CC	libavformat/cinedec.o
+CC	libavformat/codec2.o
+CC	libavformat/concat.o
+CC	libavformat/concatdec.o
+CC	libavformat/crcenc.o
+CC	libavformat/crypto.o
+CC	libavformat/dash.o
+CC	libavformat/dashenc.o
+CC	libavformat/data_uri.o
+CC	libavformat/dauddec.o
+CC	libavformat/daudenc.o
+CC	libavformat/dcstr.o
+CC	libavformat/demux.o
+CC	libavformat/demux_utils.o
+CC	libavformat/derf.o
+CC	libavformat/dfa.o
+CC	libavformat/dfpwmdec.o
+CC	libavformat/dhav.o
+CC	libavformat/diracdec.o
+CC	libavformat/dnxhddec.o
+CC	libavformat/dovi_isom.o
+CC	libavformat/dsfdec.o
+CC	libavformat/dsicin.o
+CC	libavformat/dss.o
+CC	libavformat/dtsdec.o
+CC	libavformat/dtshddec.o
+CC	libavformat/dump.o
+CC	libavformat/dv.o
+CC	libavformat/dvbsub.o
+CC	libavformat/dvbtxt.o
+CC	libavformat/dvenc.o
+CC	libavformat/dxa.o
+CC	libavformat/eacdata.o
+CC	libavformat/electronicarts.o
+CC	libavformat/epafdec.o
+CC	libavformat/evc.o
+CC	libavformat/evcdec.o
+CC	libavformat/ffmetadec.o
+CC	libavformat/ffmetaenc.o
+CC	libavformat/fifo.o
+CC	libavformat/file.o
+CC	libavformat/filmstripdec.o
+CC	libavformat/filmstripenc.o
+CC	libavformat/fitsdec.o
+CC	libavformat/fitsenc.o
+CC	libavformat/flac_picture.o
+CC	libavformat/flacdec.o
+CC	libavformat/flacenc.o
+CC	libavformat/flacenc_header.o
+CC	libavformat/flic.o
+CC	libavformat/flvdec.o
+CC	libavformat/flvenc.o
+CC	libavformat/format.o
+CC	libavformat/framecrcenc.o
+CC	libavformat/framehash.o
+CC	libavformat/frmdec.o
+CC	libavformat/fsb.o
+CC	libavformat/ftp.o
+CC	libavformat/fwse.o
+CC	libavformat/g722.o
+CC	libavformat/g723_1.o
+CC	libavformat/g726.o
+CC	libavformat/g729dec.o
+CC	libavformat/gdv.o
+CC	libavformat/genh.o
+CC	libavformat/gif.o
+CC	libavformat/gifdec.o
+CC	libavformat/gopher.o
+CC	libavformat/gsmdec.o
+CC	libavformat/gxf.o
+CC	libavformat/gxfenc.o
+CC	libavformat/h261dec.o
+CC	libavformat/h263dec.o
+CC	libavformat/h264dec.o
+CC	libavformat/hashenc.o
+CC	libavformat/hca.o
+CC	libavformat/hcom.o
+CC	libavformat/hdsenc.o
+CC	libavformat/hevc.o
+CC	libavformat/hevcdec.o
+CC	libavformat/hls.o
+CC	libavformat/hls_sample_encryption.o
+CC	libavformat/hlsenc.o
+CC	libavformat/hlsplaylist.o
+CC	libavformat/hlsproto.o
+CC	libavformat/hnm.o
+CC	libavformat/http.o
+CC	libavformat/httpauth.o
+CC	libavformat/iamf.o
+CC	libavformat/iamf_parse.o
+CC	libavformat/iamf_reader.o
+CC	libavformat/iamf_writer.o
+CC	libavformat/iamfdec.o
+CC	libavformat/iamfenc.o
+CC	libavformat/icecast.o
+CC	libavformat/icodec.o
+CC	libavformat/icoenc.o
+CC	libavformat/id3v1.o
+CC	libavformat/id3v2.o
+CC	libavformat/id3v2enc.o
+CC	libavformat/idcin.o
+CC	libavformat/idroqdec.o
+CC	libavformat/idroqenc.o
+CC	libavformat/iff.o
+CC	libavformat/ifv.o
+CC	libavformat/ilbc.o
+CC	libavformat/img2.o
+CC	libavformat/img2_alias_pix.o
+CC	libavformat/img2_brender_pix.o
+CC	libavformat/img2dec.o
+CC	libavformat/img2enc.o
+CC	libavformat/imx.o
+CC	libavformat/ip.o
+CC	libavformat/ingenientdec.o
+CC	libavformat/ipmovie.o
+CC	libavformat/ipudec.o
+CC	libavformat/ircam.o
+CC	libavformat/ircamdec.o
+CC	libavformat/ircamenc.o
+CC	libavformat/isom.o
+CC	libavformat/isom_tags.o
+CC	libavformat/iss.o
+CC	libavformat/iv8.o
+CC	libavformat/ivfdec.o
+CC	libavformat/ivfenc.o
+CC	libavformat/jacosubdec.o
+CC	libavformat/jacosubenc.o
+CC	libavformat/jpegxl_anim_dec.o
+CC	libavformat/jvdec.o
+CC	libavformat/kvag.o
+CC	libavformat/lafdec.o
+CC	libavformat/latmenc.o
+CC	libavformat/lmlm4.o
+CC	libavformat/loasdec.o
+CC	libavformat/lrc.o
+CC	libavformat/lrcdec.o
+CC	libavformat/lrcenc.o
+CC	libavformat/luodatdec.o
+CC	libavformat/lvfdec.o
+CC	libavformat/lxfdec.o
+CC	libavformat/m4vdec.o
+CC	libavformat/matroska.o
+CC	libavformat/matroskadec.o
+CC	libavformat/matroskaenc.o
+CC	libavformat/mca.o
+CC	libavformat/mccdec.o
+CC	libavformat/md5proto.o
+CC	libavformat/metadata.o
+CC	libavformat/mgsts.o
+CC	libavformat/microdvddec.o
+CC	libavformat/microdvdenc.o
+CC	libavformat/mj2kdec.o
+CC	libavformat/mkvtimestamp_v2.o
+CC	libavformat/mlpdec.o
+CC	libavformat/mlvdec.o
+CC	libavformat/mm.o
+CC	libavformat/mmf.o
+CC	libavformat/mms.o
+CC	libavformat/mmsh.o
+CC	libavformat/mmst.o
+CC	libavformat/mods.o
+CC	libavformat/moflex.o
+CC	libavformat/mov.o
+CC	libavformat/mov_chan.o
+CC	libavformat/mov_esds.o
+CC	libavformat/movenc.o
+CC	libavformat/movenc_ttml.o
+CC	libavformat/movenccenc.o
+CC	libavformat/movenchint.o
+CC	libavformat/mp3dec.o
+CC	libavformat/mp3enc.o
+CC	libavformat/mpc.o
+CC	libavformat/mpc8.o
+CC	libavformat/mpeg.o
+CC	libavformat/mpegenc.o
+CC	libavformat/mpegts.o
+CC	libavformat/mpegtsenc.o
+CC	libavformat/mpegvideodec.o
+CC	libavformat/mpjpeg.o
+CC	libavformat/mpjpegdec.o
+CC	libavformat/mpl2dec.o
+CC	libavformat/mpsubdec.o
+CC	libavformat/msf.o
+CC	libavformat/msnwc_tcp.o
+CC	libavformat/mspdec.o
+CC	libavformat/mtaf.o
+CC	libavformat/mtv.o
+CC	libavformat/musx.o
+CC	libavformat/mux.o
+CC	libavformat/mux_utils.o
+CC	libavformat/mvdec.o
+CC	libavformat/mvi.o
+CC	libavformat/mxf.o
+CC	libavformat/mxfdec.o
+CC	libavformat/mxfenc.o
+CC	libavformat/mxg.o
+CC	libavformat/ncdec.o
+CC	libavformat/network.o
+CC	libavformat/nistspheredec.o
+CC	libavformat/nspdec.o
+CC	libavformat/nsvdec.o
+CC	libavformat/nullenc.o
+CC	libavformat/nut.o
+CC	libavformat/nutdec.o
+CC	libavformat/nutenc.o
+CC	libavformat/nuv.o
+CC	libavformat/oggdec.o
+CC	libavformat/oggenc.o
+CC	libavformat/oggparsecelt.o
+CC	libavformat/oggparsedirac.o
+CC	libavformat/oggparseflac.o
+CC	libavformat/oggparseogm.o
+CC	libavformat/oggparseopus.o
+CC	libavformat/oggparseskeleton.o
+CC	libavformat/oggparsespeex.o
+CC	libavformat/oggparsetheora.o
+CC	libavformat/oggparsevorbis.o
+CC	libavformat/oggparsevp8.o
+CC	libavformat/oma.o
+CC	libavformat/omadec.o
+CC	libavformat/omaenc.o
+CC	libavformat/options.o
+CC	libavformat/os_support.o
+CC	libavformat/osq.o
+CC	libavformat/paf.o
+CC	libavformat/pcm.o
+CC	libavformat/pcmdec.o
+CC	libavformat/pcmenc.o
+CC	libavformat/pdvdec.o
+CC	libavformat/pjsdec.o
+CC	libavformat/pmpdec.o
+CC	libavformat/pp_bnk.o
+CC	libavformat/prompeg.o
+CC	libavformat/protocols.o
+CC	libavformat/psxstr.o
+CC	libavformat/pva.o
+CC	libavformat/pvfdec.o
+CC	libavformat/qcp.o
+CC	libavformat/qoadec.o
+CC	libavformat/qtpalette.o
+CC	libavformat/r3d.o
+CC	libavformat/rawdec.o
+CC	libavformat/rawenc.o
+CC	libavformat/rawutils.o
+CC	libavformat/rawvideodec.o
+CC	libavformat/rcwtenc.o
+CC	libavformat/rdt.o
+CC	libavformat/realtextdec.o
+CC	libavformat/redspark.o
+CC	libavformat/replaygain.o
+CC	libavformat/riff.o
+CC	libavformat/riffdec.o
+CC	libavformat/riffenc.o
+CC	libavformat/rka.o
+CC	libavformat/rl2.o
+CC	libavformat/rm.o
+CC	libavformat/rmdec.o
+CC	libavformat/rmenc.o
+CC	libavformat/rmsipr.o
+CC	libavformat/rpl.o
+CC	libavformat/rsd.o
+CC	libavformat/rso.o
+CC	libavformat/rsodec.o
+CC	libavformat/rsoenc.o
+CC	libavformat/rtmpdigest.o
+CC	libavformat/rtmphttp.o
+CC	libavformat/rtmppkt.o
+CC	libavformat/rtmpproto.o
+CC	libavformat/rtp.o
+CC	libavformat/rtpdec.o
+CC	libavformat/rtpdec_ac3.o
+CC	libavformat/rtpdec_amr.o
+CC	libavformat/rtpdec_asf.o
+CC	libavformat/rtpdec_dv.o
+CC	libavformat/rtpdec_g726.o
+CC	libavformat/rtpdec_h261.o
+CC	libavformat/rtpdec_h263.o
+CC	libavformat/rtpdec_h263_rfc2190.o
+CC	libavformat/rtpdec_h264.o
+CC	libavformat/rtpdec_hevc.o
+CC	libavformat/rtpdec_ilbc.o
+CC	libavformat/rtpdec_jpeg.o
+CC	libavformat/rtpdec_latm.o
+CC	libavformat/rtpdec_mpa_robust.o
+CC	libavformat/rtpdec_mpeg12.o
+CC	libavformat/rtpdec_mpeg4.o
+CC	libavformat/rtpdec_mpegts.o
+CC	libavformat/rtpdec_qcelp.o
+CC	libavformat/rtpdec_qdm2.o
+CC	libavformat/rtpdec_qt.o
+CC	libavformat/rtpdec_rfc4175.o
+CC	libavformat/rtpdec_svq3.o
+CC	libavformat/rtpdec_vc2hq.o
+CC	libavformat/rtpdec_vp8.o
+CC	libavformat/rtpdec_vp9.o
+CC	libavformat/rtpdec_xiph.o
+CC	libavformat/rtpenc.o
+CC	libavformat/rtpenc_aac.o
+CC	libavformat/rtpenc_amr.o
+CC	libavformat/rtpenc_chain.o
+CC	libavformat/rtpenc_h261.o
+CC	libavformat/rtpenc_h263.o
+CC	libavformat/rtpenc_h263_rfc2190.o
+CC	libavformat/rtpenc_h264_hevc.o
+CC	libavformat/rtpenc_jpeg.o
+CC	libavformat/rtpenc_latm.o
+CC	libavformat/rtpenc_mpegts.o
+CC	libavformat/rtpenc_mpv.o
+CC	libavformat/rtpenc_rfc4175.o
+CC	libavformat/rtpenc_vc2hq.o
+CC	libavformat/rtpenc_vp8.o
+CC	libavformat/rtpenc_vp9.o
+CC	libavformat/rtpenc_xiph.o
+CC	libavformat/rtpproto.o
+CC	libavformat/rtsp.o
+CC	libavformat/rtspdec.o
+CC	libavformat/rtspenc.o
+CC	libavformat/s337m.o
+CC	libavformat/samidec.o
+CC	libavformat/sapdec.o
+CC	libavformat/sapenc.o
+CC	libavformat/sauce.o
+CC	libavformat/sbcdec.o
+CC	libavformat/sbgdec.o
+CC	libavformat/sccdec.o
+CC	libavformat/sccenc.o
+CC	libavformat/scd.o
+CC	libavformat/sdns.o
+CC	libavformat/sdp.o
+CC	libavformat/sdr2.o
+CC	libavformat/sdsdec.o
+CC	libavformat/sdxdec.o
+CC	libavformat/seek.o
+CC	libavformat/segafilm.o
+CC	libavformat/segafilmenc.o
+CC	libavformat/segment.o
+CC	libavformat/serdec.o
+CC	libavformat/sga.o
+CC	libavformat/shortendec.o
+CC	libavformat/sierravmd.o
+CC	libavformat/siff.o
+CC	libavformat/smacker.o
+CC	libavformat/smjpeg.o
+CC	libavformat/smjpegdec.o
+CC	libavformat/smjpegenc.o
+CC	libavformat/smoothstreamingenc.o
+CC	libavformat/smush.o
+CC	libavformat/sol.o
+CC	libavformat/soxdec.o
+CC	libavformat/soxenc.o
+CC	libavformat/spdif.o
+CC	libavformat/spdifdec.o
+CC	libavformat/spdifenc.o
+CC	libavformat/srtdec.o
+CC	libavformat/srtenc.o
+CC	libavformat/srtp.o
+CC	libavformat/srtpproto.o
+CC	libavformat/stldec.o
+CC	libavformat/subfile.o
+CC	libavformat/subtitles.o
+CC	libavformat/subviewer1dec.o
+CC	libavformat/subviewerdec.o
+CC	libavformat/supdec.o
+CC	libavformat/supenc.o
+CC	libavformat/svag.o
+CC	libavformat/svs.o
+CC	libavformat/swf.o
+CC	libavformat/swfdec.o
+CC	libavformat/swfenc.o
+CC	libavformat/takdec.o
+CC	libavformat/tcp.o
+CC	libavformat/tedcaptionsdec.o
+CC	libavformat/tee.o
+CC	libavformat/tee_common.o
+CC	libavformat/teeproto.o
+CC	libavformat/thp.o
+CC	libavformat/tiertexseq.o
+CC	libavformat/tmv.o
+CC	libavformat/tta.o
+CC	libavformat/ttaenc.o
+CC	libavformat/ttmlenc.o
+CC	libavformat/tty.o
+CC	libavformat/txd.o
+CC	libavformat/ty.o
+CC	libavformat/udp.o
+CC	libavformat/uncodedframecrcenc.o
+CC	libavformat/unix.o
+CC	libavformat/url.o
+CC	libavformat/urldecode.o
+CC	libavformat/usmdec.o
+CC	libavformat/utils.o
+CC	libavformat/vag.o
+CC	libavformat/vc1dec.o
+CC	libavformat/vc1test.o
+CC	libavformat/vc1testenc.o
+CC	libavformat/version.o
+CC	libavformat/vividas.o
+CC	libavformat/vivo.o
+CC	libavformat/voc.o
+CC	libavformat/voc_packet.o
+CC	libavformat/vocdec.o
+CC	libavformat/vocenc.o
+CC	libavformat/vorbiscomment.o
+CC	libavformat/vpcc.o
+CC	libavformat/vpk.o
+CC	libavformat/vplayerdec.o
+CC	libavformat/vqf.o
+CC	libavformat/vvc.o
+CC	libavformat/vvcdec.o
+CC	libavformat/w64.o
+CC	libavformat/wady.o
+CC	libavformat/wavarc.o
+CC	libavformat/wavdec.o
+CC	libavformat/wavenc.o
+CC	libavformat/wc3movie.o
+CC	libavformat/webm_chunk.o
+CC	libavformat/webmdashenc.o
+CC	libavformat/webpenc.o
+CC	libavformat/webvttdec.o
+CC	libavformat/webvttenc.o
+CC	libavformat/westwood_aud.o
+CC	libavformat/westwood_audenc.o
+CC	libavformat/westwood_vqa.o
+CC	libavformat/wsddec.o
+CC	libavformat/wtv_common.o
+CC	libavformat/wtvdec.o
+CC	libavformat/wtvenc.o
+CC	libavformat/wv.o
+CC	libavformat/wvdec.o
+CC	libavformat/wvedec.o
+CC	libavformat/wvenc.o
+CC	libavformat/xa.o
+CC	libavformat/xmd.o
+CC	libavformat/xmv.o
+CC	libavformat/xvag.o
+CC	libavformat/xwma.o
+CC	libavformat/yop.o
+CC	libavformat/yuv4mpegdec.o
+CC	libavformat/yuv4mpegenc.o
+GEN	libavformat/libavformat.pc
+CC	libavcodec/012v.o
+CC	libavcodec/4xm.o
+CC	libavcodec/8bps.o
+CC	libavcodec/8svx.o
+CC	libavcodec/a64multienc.o
+CC	libavcodec/aac_ac3_parser.o
+CC	libavcodec/aac_parser.o
+CC	libavcodec/aaccoder.o
+CC	libavcodec/aacdec.o
+CC	libavcodec/aacdec_common.o
+CC	libavcodec/aacdec_fixed.o
+CC	libavcodec/aacenc.o
+CC	libavcodec/aacenc_is.o
+CC	libavcodec/aacenc_ltp.o
+CC	libavcodec/aacenc_pred.o
+CC	libavcodec/aacenc_tns.o
+CC	libavcodec/aacenctab.o
+CC	libavcodec/aacps_common.o
+CC	libavcodec/aacps_fixed.o
+CC	libavcodec/aacps_float.o
+CC	libavcodec/aacpsdsp_fixed.o
+CC	libavcodec/aacpsdsp_float.o
+CC	libavcodec/aacpsy.o
+CC	libavcodec/aacsbr.o
+CC	libavcodec/aacsbr_fixed.o
+CC	libavcodec/aactab.o
+CC	libavcodec/aandcttab.o
+CC	libavcodec/aarch64/aacpsdsp_init_aarch64.o
+AS	libavcodec/aarch64/aacpsdsp_neon.o
+CC	libavcodec/aarch64/fmtconvert_init.o
+AS	libavcodec/aarch64/fmtconvert_neon.o
+CC	libavcodec/aarch64/h264chroma_init_aarch64.o
+AS	libavcodec/aarch64/h264cmc_neon.o
+CC	libavcodec/aarch64/h264dsp_init_aarch64.o
+AS	libavcodec/aarch64/h264dsp_neon.o
+AS	libavcodec/aarch64/h264idct_neon.o
+CC	libavcodec/aarch64/h264pred_init.o
+AS	libavcodec/aarch64/h264pred_neon.o
+CC	libavcodec/aarch64/h264qpel_init_aarch64.o
+AS	libavcodec/aarch64/h264qpel_neon.o
+AS	libavcodec/aarch64/hevcdsp_deblock_neon.o
+AS	libavcodec/aarch64/hevcdsp_epel_neon.o
+AS	libavcodec/aarch64/hevcdsp_idct_neon.o
+CC	libavcodec/aarch64/hevcdsp_init_aarch64.o
+AS	libavcodec/aarch64/hevcdsp_qpel_neon.o
+AS	libavcodec/aarch64/hevcdsp_sao_neon.o
+CC	libavcodec/aarch64/hpeldsp_init_aarch64.o
+AS	libavcodec/aarch64/hpeldsp_neon.o
+CC	libavcodec/aarch64/idctdsp_init_aarch64.o
+AS	libavcodec/aarch64/idctdsp_neon.o
+CC	libavcodec/aarch64/me_cmp_init_aarch64.o
+AS	libavcodec/aarch64/me_cmp_neon.o
+CC	libavcodec/aarch64/mpegaudiodsp_init.o
+AS	libavcodec/aarch64/mpegaudiodsp_neon.o
+CC	libavcodec/aarch64/opusdsp_init.o
+AS	libavcodec/aarch64/opusdsp_neon.o
+CC	libavcodec/aarch64/pixblockdsp_init_aarch64.o
+AS	libavcodec/aarch64/pixblockdsp_neon.o
+CC	libavcodec/aarch64/rv40dsp_init_aarch64.o
+CC	libavcodec/aarch64/sbrdsp_init_aarch64.o
+AS	libavcodec/aarch64/sbrdsp_neon.o
+AS	libavcodec/aarch64/simple_idct_neon.o
+CC	libavcodec/aarch64/synth_filter_init.o
+AS	libavcodec/aarch64/synth_filter_neon.o
+CC	libavcodec/aarch64/vc1dsp_init_aarch64.o
+AS	libavcodec/aarch64/vc1dsp_neon.o
+AS	libavcodec/aarch64/videodsp.o
+CC	libavcodec/aarch64/videodsp_init.o
+CC	libavcodec/aarch64/vorbisdsp_init.o
+AS	libavcodec/aarch64/vorbisdsp_neon.o
+CC	libavcodec/aarch64/vp8dsp_init_aarch64.o
+AS	libavcodec/aarch64/vp8dsp_neon.o
+CC	libavcodec/aarch64/vp9dsp_init_10bpp_aarch64.o
+CC	libavcodec/aarch64/vp9dsp_init_12bpp_aarch64.o
+CC	libavcodec/aarch64/vp9dsp_init_aarch64.o
+AS	libavcodec/aarch64/vp9itxfm_16bpp_neon.o
+AS	libavcodec/aarch64/vp9itxfm_neon.o
+AS	libavcodec/aarch64/vp9lpf_16bpp_neon.o
+AS	libavcodec/aarch64/vp9lpf_neon.o
+AS	libavcodec/aarch64/vp9mc_16bpp_neon.o
+AS	libavcodec/aarch64/vp9mc_aarch64.o
+AS	libavcodec/aarch64/vp9mc_neon.o
+CC	libavcodec/aasc.o
+CC	libavcodec/ac3.o
+CC	libavcodec/ac3_channel_layout_tab.o
+CC	libavcodec/ac3_parser.o
+CC	libavcodec/ac3dec_data.o
+CC	libavcodec/ac3dec_fixed.o
+CC	libavcodec/ac3dec_float.o
+CC	libavcodec/ac3dsp.o
+CC	libavcodec/ac3enc.o
+CC	libavcodec/ac3enc_fixed.o
+CC	libavcodec/ac3enc_float.o
+CC	libavcodec/ac3tab.o
+CC	libavcodec/acelp_filters.o
+CC	libavcodec/acelp_pitch_delay.o
+CC	libavcodec/acelp_vectors.o
+CC	libavcodec/adpcm.o
+CC	libavcodec/adpcm_data.o
+CC	libavcodec/adpcmenc.o
+CC	libavcodec/adts_header.o
+CC	libavcodec/adts_parser.o
+CC	libavcodec/adx.o
+CC	libavcodec/adx_parser.o
+CC	libavcodec/adxdec.o
+CC	libavcodec/adxenc.o
+CC	libavcodec/agm.o
+CC	libavcodec/aic.o
+CC	libavcodec/alac.o
+CC	libavcodec/alac_data.o
+CC	libavcodec/alacdsp.o
+CC	libavcodec/alacenc.o
+In file included from libavcodec/ac3dec_float.c:38:
+In function 'spx_strategy',
+    inlined from 'decode_audio_block' at libavcodec/ac3dec.c:1142:24:
+libavcodec/ac3dec.c:854:37: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+  854 |             s->channel_uses_spx[ch] = get_bits1(bc);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+In file included from libavcodec/ac3dec_float.c:34:
+libavcodec/ac3dec.h: In function 'decode_audio_block':
+libavcodec/ac3dec.h:144:13: note: at offset 7 into destination object 'channel_uses_spx' of size 7
+  144 |     uint8_t channel_uses_spx[AC3_MAX_CHANNELS]; ///< channel uses spectral extension        (chinspx)
+      |             ^~~~~~~~~~~~~~~~
+In file included from libavcodec/ac3dec_fixed.c:156:
+In function 'spx_strategy',
+    inlined from 'decode_audio_block' at libavcodec/ac3dec.c:1142:24:
+libavcodec/ac3dec.c:854:37: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+  854 |             s->channel_uses_spx[ch] = get_bits1(bc);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+In file included from libavcodec/ac3dec_fixed.c:51:
+libavcodec/ac3dec.h: In function 'decode_audio_block':
+libavcodec/ac3dec.h:144:13: note: at offset 7 into destination object 'channel_uses_spx' of size 7
+  144 |     uint8_t channel_uses_spx[AC3_MAX_CHANNELS]; ///< channel uses spectral extension        (chinspx)
+      |             ^~~~~~~~~~~~~~~~
+CC	libavcodec/aliaspixdec.o
+CC	libavcodec/aliaspixenc.o
+CC	libavcodec/allcodecs.o
+CC	libavcodec/alsdec.o
+CC	libavcodec/amr_parser.o
+CC	libavcodec/amrnbdec.o
+CC	libavcodec/amrwbdec.o
+CC	libavcodec/anm.o
+CC	libavcodec/ansi.o
+CC	libavcodec/aom_film_grain.o
+CC	libavcodec/apac.o
+CC	libavcodec/apedec.o
+CC	libavcodec/aptx.o
+CC	libavcodec/aptxdec.o
+CC	libavcodec/aptxenc.o
+CC	libavcodec/arbc.o
+CC	libavcodec/argo.o
+CC	libavcodec/ass.o
+CC	libavcodec/ass_split.o
+CC	libavcodec/assdec.o
+CC	libavcodec/assenc.o
+CC	libavcodec/asv.o
+CC	libavcodec/asvdec.o
+CC	libavcodec/asvenc.o
+CC	libavcodec/atrac.o
+CC	libavcodec/atrac1.o
+CC	libavcodec/atrac3.o
+CC	libavcodec/atrac3plus.o
+CC	libavcodec/atrac3plusdec.o
+CC	libavcodec/atrac3plusdsp.o
+CC	libavcodec/atrac9dec.o
+CC	libavcodec/atsc_a53.o
+CC	libavcodec/audio_frame_queue.o
+CC	libavcodec/audiodsp.o
+CC	libavcodec/aura.o
+CC	libavcodec/av1_parse.o
+CC	libavcodec/av1_parser.o
+CC	libavcodec/av1dec.o
+CC	libavcodec/avcodec.o
+CC	libavcodec/avdct.o
+CC	libavcodec/avfft.o
+CC	libavcodec/avpacket.o
+CC	libavcodec/avrndec.o
+CC	libavcodec/avs.o
+CC	libavcodec/avs2.o
+CC	libavcodec/avs2_parser.o
+CC	libavcodec/avs3_parser.o
+CC	libavcodec/avuidec.o
+CC	libavcodec/avuienc.o
+CC	libavcodec/bethsoftvideo.o
+CC	libavcodec/bfi.o
+CC	libavcodec/bgmc.o
+CC	libavcodec/bink.o
+CC	libavcodec/binkaudio.o
+CC	libavcodec/binkdsp.o
+CC	libavcodec/bintext.o
+CC	libavcodec/bitpacked_dec.o
+CC	libavcodec/bitpacked_enc.o
+CC	libavcodec/bitstream.o
+CC	libavcodec/bitstream_filters.o
+CC	libavcodec/blockdsp.o
+CC	libavcodec/bmp.o
+CC	libavcodec/bmp_parser.o
+CC	libavcodec/bmpenc.o
+CC	libavcodec/bmvaudio.o
+CC	libavcodec/bmvvideo.o
+CC	libavcodec/bonk.o
+CC	libavcodec/brenderpix.o
+CC	libavcodec/bsf.o
+CC	libavcodec/bsf/aac_adtstoasc.o
+CC	libavcodec/bsf/av1_frame_merge.o
+CC	libavcodec/bsf/av1_frame_split.o
+CC	libavcodec/bsf/av1_metadata.o
+CC	libavcodec/bsf/chomp.o
+CC	libavcodec/bsf/dca_core.o
+CC	libavcodec/bsf/dts2pts.o
+CC	libavcodec/bsf/dump_extradata.o
+CC	libavcodec/bsf/dv_error_marker.o
+CC	libavcodec/bsf/eac3_core.o
+CC	libavcodec/bsf/evc_frame_merge.o
+CC	libavcodec/bsf/extract_extradata.o
+CC	libavcodec/bsf/filter_units.o
+CC	libavcodec/bsf/h264_metadata.o
+CC	libavcodec/bsf/h264_mp4toannexb.o
+CC	libavcodec/bsf/h264_redundant_pps.o
+CC	libavcodec/bsf/h265_metadata.o
+CC	libavcodec/bsf/h266_metadata.o
+CC	libavcodec/bsf/hapqa_extract.o
+CC	libavcodec/bsf/hevc_mp4toannexb.o
+CC	libavcodec/bsf/imx_dump_header.o
+CC	libavcodec/bsf/media100_to_mjpegb.o
+CC	libavcodec/bsf/mjpeg2jpeg.o
+CC	libavcodec/bsf/mjpega_dump_header.o
+CC	libavcodec/bsf/movsub.o
+CC	libavcodec/bsf/mpeg2_metadata.o
+CC	libavcodec/bsf/mpeg4_unpack_bframes.o
+CC	libavcodec/bsf/noise.o
+CC	libavcodec/bsf/null.o
+CC	libavcodec/bsf/opus_metadata.o
+CC	libavcodec/bsf/pcm_rechunk.o
+CC	libavcodec/bsf/pgs_frame_merge.o
+CC	libavcodec/bsf/prores_metadata.o
+CC	libavcodec/bsf/remove_extradata.o
+CC	libavcodec/bsf/setts.o
+CC	libavcodec/bsf/showinfo.o
+CC	libavcodec/bsf/trace_headers.o
+CC	libavcodec/bsf/truehd_core.o
+CC	libavcodec/bsf/vp9_metadata.o
+CC	libavcodec/bsf/vp9_raw_reorder.o
+CC	libavcodec/bsf/vp9_superframe.o
+CC	libavcodec/bsf/vp9_superframe_split.o
+CC	libavcodec/bsf/vvc_mp4toannexb.o
+CC	libavcodec/bswapdsp.o
+CC	libavcodec/c93.o
+CC	libavcodec/cabac.o
+CC	libavcodec/canopus.o
+CC	libavcodec/cavs.o
+CC	libavcodec/cavs_parser.o
+CC	libavcodec/cavsdata.o
+CC	libavcodec/cavsdec.o
+CC	libavcodec/cavsdsp.o
+CC	libavcodec/cbrt_data.o
+CC	libavcodec/cbrt_data_fixed.o
+CC	libavcodec/cbs.o
+CC	libavcodec/cbs_av1.o
+CC	libavcodec/cbs_bsf.o
+CC	libavcodec/cbs_h2645.o
+CC	libavcodec/cbs_mpeg2.o
+CC	libavcodec/cbs_sei.o
+CC	libavcodec/cbs_vp8.o
+CC	libavcodec/cbs_vp9.o
+CC	libavcodec/ccaption_dec.o
+CC	libavcodec/cdgraphics.o
+CC	libavcodec/cdtoons.o
+CC	libavcodec/cdxl.o
+CC	libavcodec/celp_filters.o
+CC	libavcodec/celp_math.o
+CC	libavcodec/cfhd.o
+CC	libavcodec/cfhddata.o
+CC	libavcodec/cfhddsp.o
+CC	libavcodec/cfhdenc.o
+CC	libavcodec/cfhdencdsp.o
+CC	libavcodec/cga_data.o
+CC	libavcodec/cinepak.o
+CC	libavcodec/cinepakenc.o
+CC	libavcodec/clearvideo.o
+CC	libavcodec/cljrdec.o
+CC	libavcodec/cljrenc.o
+CC	libavcodec/cllc.o
+CC	libavcodec/cngdec.o
+CC	libavcodec/cngenc.o
+CC	libavcodec/codec_desc.o
+CC	libavcodec/codec_par.o
+CC	libavcodec/cook.o
+CC	libavcodec/cook_parser.o
+CC	libavcodec/cpia.o
+CC	libavcodec/cri.o
+CC	libavcodec/cri_parser.o
+CC	libavcodec/cscd.o
+CC	libavcodec/cyuv.o
+CC	libavcodec/d3d11va.o
+CC	libavcodec/dca.o
+CC	libavcodec/dca_core.o
+CC	libavcodec/dca_exss.o
+CC	libavcodec/dca_lbr.o
+CC	libavcodec/dca_parser.o
+CC	libavcodec/dca_sample_rate_tab.o
+CC	libavcodec/dca_xll.o
+CC	libavcodec/dcaadpcm.o
+CC	libavcodec/dcadata.o
+CC	libavcodec/dcadct.o
+CC	libavcodec/dcadec.o
+CC	libavcodec/dcadsp.o
+CC	libavcodec/dcaenc.o
+CC	libavcodec/dcahuff.o
+CC	libavcodec/dct32_fixed.o
+CC	libavcodec/dct32_float.o
+CC	libavcodec/dds.o
+CC	libavcodec/decode.o
+CC	libavcodec/dfa.o
+CC	libavcodec/dfpwmdec.o
+CC	libavcodec/dfpwmenc.o
+CC	libavcodec/dirac.o
+CC	libavcodec/dirac_arith.o
+CC	libavcodec/dirac_dwt.o
+CC	libavcodec/dirac_parser.o
+CC	libavcodec/dirac_vlc.o
+CC	libavcodec/diracdec.o
+CC	libavcodec/diracdsp.o
+CC	libavcodec/diractab.o
+CC	libavcodec/dnxhd_parser.o
+CC	libavcodec/dnxhddata.o
+CC	libavcodec/dnxhddec.o
+CC	libavcodec/dnxhdenc.o
+CC	libavcodec/dolby_e.o
+CC	libavcodec/dolby_e_parse.o
+CC	libavcodec/dolby_e_parser.o
+CC	libavcodec/dovi_rpu.o
+CC	libavcodec/dpcm.o
+CC	libavcodec/dpx.o
+CC	libavcodec/dpx_parser.o
+CC	libavcodec/dpxenc.o
+CC	libavcodec/dsd.o
+CC	libavcodec/dsddec.o
+CC	libavcodec/dsicinaudio.o
+CC	libavcodec/dsicinvideo.o
+CC	libavcodec/dss_sp.o
+CC	libavcodec/dstdec.o
+CC	libavcodec/dv.o
+CC	libavcodec/dv_profile.o
+CC	libavcodec/dvaudio_parser.o
+CC	libavcodec/dvaudiodec.o
+CC	libavcodec/dvbsub_parser.o
+CC	libavcodec/dvbsubdec.o
+CC	libavcodec/dvbsubenc.o
+CC	libavcodec/dvd_nav_parser.o
+CC	libavcodec/dvdata.o
+CC	libavcodec/dvdec.o
+CC	libavcodec/dvdsub.o
+CC	libavcodec/dvdsub_parser.o
+CC	libavcodec/dvdsubdec.o
+CC	libavcodec/dvdsubenc.o
+CC	libavcodec/dvenc.o
+CC	libavcodec/dxtory.o
+CC	libavcodec/dxv.o
+CC	libavcodec/dxvenc.o
+CC	libavcodec/dynamic_hdr_vivid.o
+CC	libavcodec/eac3_data.o
+CC	libavcodec/eac3enc.o
+CC	libavcodec/eacmv.o
+CC	libavcodec/eaidct.o
+CC	libavcodec/eamad.o
+CC	libavcodec/eatgq.o
+CC	libavcodec/eatgv.o
+CC	libavcodec/eatqi.o
+CC	libavcodec/elbg.o
+CC	libavcodec/encode.o
+CC	libavcodec/error_resilience.o
+CC	libavcodec/escape124.o
+CC	libavcodec/escape130.o
+CC	libavcodec/evc_parse.o
+CC	libavcodec/evc_parser.o
+CC	libavcodec/evc_ps.o
+CC	libavcodec/evrcdec.o
+CC	libavcodec/exif.o
+CC	libavcodec/faandct.o
+CC	libavcodec/faanidct.o
+CC	libavcodec/fastaudio.o
+CC	libavcodec/faxcompr.o
+CC	libavcodec/fdctdsp.o
+CC	libavcodec/ffv1.o
+CC	libavcodec/ffv1dec.o
+CC	libavcodec/ffv1enc.o
+CC	libavcodec/ffwavesynth.o
+CC	libavcodec/fic.o
+CC	libavcodec/fits.o
+CC	libavcodec/fitsdec.o
+CC	libavcodec/fitsenc.o
+CC	libavcodec/flac.o
+CC	libavcodec/flac_parser.o
+CC	libavcodec/flacdata.o
+CC	libavcodec/flacdec.o
+CC	libavcodec/flacdsp.o
+CC	libavcodec/flacenc.o
+CC	libavcodec/flacencdsp.o
+CC	libavcodec/flicvideo.o
+CC	libavcodec/float2half.o
+CC	libavcodec/flvdec.o
+CC	libavcodec/flvenc.o
+CC	libavcodec/fmtconvert.o
+CC	libavcodec/fmvc.o
+CC	libavcodec/frame_thread_encoder.o
+CC	libavcodec/fraps.o
+CC	libavcodec/frwu.o
+CC	libavcodec/ftr.o
+CC	libavcodec/ftr_parser.o
+CC	libavcodec/g722.o
+CC	libavcodec/g722dec.o
+CC	libavcodec/g722dsp.o
+CC	libavcodec/g722enc.o
+CC	libavcodec/g723_1.o
+CC	libavcodec/g723_1_parser.o
+CC	libavcodec/g723_1dec.o
+CC	libavcodec/g723_1enc.o
+CC	libavcodec/g726.o
+CC	libavcodec/g729_parser.o
+CC	libavcodec/g729dec.o
+CC	libavcodec/g729postfilter.o
+CC	libavcodec/gdv.o
+CC	libavcodec/gemdec.o
+CC	libavcodec/get_buffer.o
+CC	libavcodec/gif.o
+CC	libavcodec/gif_parser.o
+CC	libavcodec/gifdec.o
+CC	libavcodec/golomb.o
+CC	libavcodec/gsm_parser.o
+CC	libavcodec/gsmdec.o
+CC	libavcodec/gsmdec_data.o
+CC	libavcodec/h261.o
+CC	libavcodec/h261_parser.o
+CC	libavcodec/h261data.o
+CC	libavcodec/h261dec.o
+CC	libavcodec/h261enc.o
+CC	libavcodec/h263.o
+CC	libavcodec/h263_parser.o
+CC	libavcodec/h263data.o
+CC	libavcodec/h263dec.o
+CC	libavcodec/h263dsp.o
+CC	libavcodec/h2645_parse.o
+CC	libavcodec/h2645_sei.o
+CC	libavcodec/h2645_vui.o
+CC	libavcodec/h2645data.o
+CC	libavcodec/h264_cabac.o
+CC	libavcodec/h264_cavlc.o
+CC	libavcodec/h264_direct.o
+CC	libavcodec/h264_levels.o
+CC	libavcodec/h264_loopfilter.o
+CC	libavcodec/h264_mb.o
+CC	libavcodec/h264_parse.o
+CC	libavcodec/h264_parser.o
+CC	libavcodec/h264_picture.o
+CC	libavcodec/h264_ps.o
+CC	libavcodec/h264_refs.o
+CC	libavcodec/h264_sei.o
+CC	libavcodec/h264_slice.o
+CC	libavcodec/h264chroma.o
+CC	libavcodec/h264data.o
+CC	libavcodec/h264dec.o
+CC	libavcodec/h264dsp.o
+CC	libavcodec/h264idct.o
+CC	libavcodec/h264pred.o
+CC	libavcodec/h264qpel.o
+CC	libavcodec/h265_profile_level.o
+CC	libavcodec/h274.o
+CC	libavcodec/half2float.o
+CC	libavcodec/hap.o
+CC	libavcodec/hapdec.o
+CC	libavcodec/hcadec.o
+CC	libavcodec/hcom.o
+CC	libavcodec/hdr_parser.o
+CC	libavcodec/hdrdec.o
+CC	libavcodec/hdrenc.o
+CC	libavcodec/hevc_cabac.o
+CC	libavcodec/hevc_data.o
+CC	libavcodec/hevc_filter.o
+CC	libavcodec/hevc_mvs.o
+CC	libavcodec/hevc_parse.o
+CC	libavcodec/hevc_parser.o
+CC	libavcodec/hevc_ps.o
+CC	libavcodec/hevc_refs.o
+CC	libavcodec/hevc_sei.o
+CC	libavcodec/hevcdec.o
+CC	libavcodec/hevcdsp.o
+CC	libavcodec/hevcpred.o
+CC	libavcodec/hnm4video.o
+CC	libavcodec/hpeldsp.o
+CC	libavcodec/hq_hqa.o
+CC	libavcodec/hq_hqadsp.o
+CC	libavcodec/hqx.o
+CC	libavcodec/hqxdsp.o
+CC	libavcodec/hqxvlc.o
+CC	libavcodec/htmlsubtitles.o
+CC	libavcodec/huffman.o
+libavcodec/hevcdec.c: In function 'pred_weight_table':
+libavcodec/hevcdec.c:175:32: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+  175 |         luma_weight_l0_flag[i] = get_bits1(gb);
+      |         ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+libavcodec/hevcdec.c:153:13: note: at offset 16 into destination object 'luma_weight_l0_flag' of size 16
+  153 |     uint8_t luma_weight_l0_flag[16];
+      |             ^~~~~~~~~~~~~~~~~~~
+libavcodec/hevcdec.c:183:38: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+  183 |             chroma_weight_l0_flag[i] = get_bits1(gb);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+libavcodec/hevcdec.c:154:13: note: at offset 16 into destination object 'chroma_weight_l0_flag' of size 16
+  154 |     uint8_t chroma_weight_l0_flag[16];
+      |             ^~~~~~~~~~~~~~~~~~~~~
+libavcodec/hevcdec.c:219:36: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+  219 |             luma_weight_l1_flag[i] = get_bits1(gb);
+      |             ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+libavcodec/hevcdec.c:155:13: note: at offset 16 into destination object 'luma_weight_l1_flag' of size 16
+  155 |     uint8_t luma_weight_l1_flag[16];
+      |             ^~~~~~~~~~~~~~~~~~~
+libavcodec/hevcdec.c:227:42: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+  227 |                 chroma_weight_l1_flag[i] = get_bits1(gb);
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+libavcodec/hevcdec.c:156:13: note: at offset 16 into destination object 'chroma_weight_l1_flag' of size 16
+  156 |     uint8_t chroma_weight_l1_flag[16];
+      |             ^~~~~~~~~~~~~~~~~~~~~
+CC	libavcodec/huffyuv.o
+CC	libavcodec/huffyuvdec.o
+CC	libavcodec/huffyuvdsp.o
+CC	libavcodec/huffyuvenc.o
+CC	libavcodec/huffyuvencdsp.o
+CC	libavcodec/idcinvideo.o
+CC	libavcodec/idctdsp.o
+CC	libavcodec/iff.o
+CC	libavcodec/iirfilter.o
+CC	libavcodec/ilbcdec.o
+CC	libavcodec/imc.o
+CC	libavcodec/imgconvert.o
+CC	libavcodec/imm4.o
+CC	libavcodec/imm5.o
+CC	libavcodec/imx.o
+CC	libavcodec/indeo2.o
+CC	libavcodec/indeo3.o
+CC	libavcodec/indeo4.o
+CC	libavcodec/indeo5.o
+CC	libavcodec/intelh263dec.o
+CC	libavcodec/interplayacm.o
+CC	libavcodec/interplayvideo.o
+CC	libavcodec/intrax8.o
+CC	libavcodec/intrax8dsp.o
+CC	libavcodec/ipu_parser.o
+CC	libavcodec/ituh263dec.o
+CC	libavcodec/ituh263enc.o
+CC	libavcodec/ivi.o
+CC	libavcodec/ivi_dsp.o
+CC	libavcodec/j2kenc.o
+CC	libavcodec/jacosubdec.o
+CC	libavcodec/jfdctfst.o
+CC	libavcodec/jfdctint.o
+CC	libavcodec/jni.o
+CC	libavcodec/jpeg2000.o
+CC	libavcodec/jpeg2000_parser.o
+CC	libavcodec/jpeg2000dec.o
+CC	libavcodec/jpeg2000dsp.o
+CC	libavcodec/jpeg2000dwt.o
+CC	libavcodec/jpeg2000htdec.o
+CC	libavcodec/jpegls.o
+CC	libavcodec/jpeglsdec.o
+CC	libavcodec/jpeglsenc.o
+CC	libavcodec/jpegquanttables.o
+CC	libavcodec/jpegtables.o
+CC	libavcodec/jpegxl_parse.o
+CC	libavcodec/jpegxl_parser.o
+CC	libavcodec/jrevdct.o
+libavcodec/jrevdct.c:215:28: warning: argument 1 of type 'int16_t[64]' {aka 'short int[64]'} with mismatched bound [-Warray-parameter=]
+  215 | void ff_j_rev_dct(DCTBLOCK data)
+      |                   ~~~~~~~~~^~~~
+In file included from libavcodec/jrevdct.c:70:
+libavcodec/dct.h:30:28: note: previously declared as 'int16_t *' {aka 'short int *'}
+   30 | void ff_j_rev_dct(int16_t *data);
+      |                   ~~~~~~~~~^~~~
+libavcodec/jrevdct.c:953:29: warning: argument 1 of type 'int16_t[64]' {aka 'short int[64]'} with mismatched bound [-Warray-parameter=]
+  953 | void ff_j_rev_dct4(DCTBLOCK data)
+      |                    ~~~~~~~~~^~~~
+libavcodec/dct.h:31:29: note: previously declared as 'int16_t *' {aka 'short int *'}
+   31 | void ff_j_rev_dct4(int16_t *data);
+      |                    ~~~~~~~~~^~~~
+libavcodec/jrevdct.c:1140:29: warning: argument 1 of type 'int16_t[64]' {aka 'short int[64]'} with mismatched bound [-Warray-parameter=]
+ 1140 | void ff_j_rev_dct2(DCTBLOCK data){
+      |                    ~~~~~~~~~^~~~
+libavcodec/dct.h:32:29: note: previously declared as 'int16_t *' {aka 'short int *'}
+   32 | void ff_j_rev_dct2(int16_t *data);
+      |                    ~~~~~~~~~^~~~
+libavcodec/jrevdct.c:1155:29: warning: argument 1 of type 'int16_t[64]' {aka 'short int[64]'} with mismatched bound [-Warray-parameter=]
+ 1155 | void ff_j_rev_dct1(DCTBLOCK data){
+      |                    ~~~~~~~~~^~~~
+libavcodec/dct.h:33:29: note: previously declared as 'int16_t *' {aka 'short int *'}
+   33 | void ff_j_rev_dct1(int16_t *data);
+      |                    ~~~~~~~~~^~~~
+CC	libavcodec/jvdec.o
+CC	libavcodec/kbdwin.o
+CC	libavcodec/kgv1dec.o
+CC	libavcodec/kmvc.o
+CC	libavcodec/lagarith.o
+CC	libavcodec/lagarithrac.o
+CC	libavcodec/latm_parser.o
+CC	libavcodec/lcldec.o
+CC	libavcodec/leaddec.o
+CC	libavcodec/libmp3lame.o
+CC	libavcodec/ljpegenc.o
+CC	libavcodec/loco.o
+CC	libavcodec/lossless_audiodsp.o
+CC	libavcodec/lossless_videodsp.o
+CC	libavcodec/lossless_videoencdsp.o
+CC	libavcodec/lpc.o
+CC	libavcodec/lsp.o
+CC	libavcodec/lzf.o
+CC	libavcodec/lzw.o
+CC	libavcodec/lzwenc.o
+CC	libavcodec/m101.o
+CC	libavcodec/mace.o
+CC	libavcodec/magicyuv.o
+CC	libavcodec/magicyuvenc.o
+CC	libavcodec/mathtables.o
+CC	libavcodec/mdec.o
+CC	libavcodec/me_cmp.o
+CC	libavcodec/mediacodec.o
+CC	libavcodec/metasound.o
+CC	libavcodec/microdvddec.o
+CC	libavcodec/midivid.o
+CC	libavcodec/mimic.o
+CC	libavcodec/misc4.o
+CC	libavcodec/misc4_parser.o
+CC	libavcodec/mjpeg_parser.o
+CC	libavcodec/mjpegbdec.o
+CC	libavcodec/mjpegdec.o
+CC	libavcodec/mjpegdec_common.o
+CC	libavcodec/mjpegenc.o
+CC	libavcodec/mjpegenc_common.o
+CC	libavcodec/mjpegenc_huffman.o
+CC	libavcodec/mlp.o
+CC	libavcodec/mlp_parse.o
+CC	libavcodec/mlp_parser.o
+CC	libavcodec/mlpdec.o
+CC	libavcodec/mlpdsp.o
+CC	libavcodec/mlpenc.o
+CC	libavcodec/mlz.o
+CC	libavcodec/mmvideo.o
+CC	libavcodec/mobiclip.o
+CC	libavcodec/motion_est.o
+CC	libavcodec/motionpixels.o
+CC	libavcodec/movtextdec.o
+CC	libavcodec/movtextenc.o
+CC	libavcodec/mpc.o
+CC	libavcodec/mpc7.o
+CC	libavcodec/mpc8.o
+CC	libavcodec/mpeg12.o
+CC	libavcodec/mpeg12data.o
+CC	libavcodec/mpeg12dec.o
+CC	libavcodec/mpeg12enc.o
+CC	libavcodec/mpeg12framerate.o
+CC	libavcodec/mpeg4audio.o
+CC	libavcodec/mpeg4audio_sample_rates.o
+CC	libavcodec/mpeg4video.o
+CC	libavcodec/mpeg4video_parser.o
+CC	libavcodec/mpeg4videodec.o
+CC	libavcodec/mpeg4videodsp.o
+CC	libavcodec/mpeg4videoenc.o
+CC	libavcodec/mpeg_er.o
+CC	libavcodec/mpegaudio.o
+CC	libavcodec/mpegaudio_parser.o
+CC	libavcodec/mpegaudiodata.o
+CC	libavcodec/mpegaudiodec_common.o
+CC	libavcodec/mpegaudiodec_fixed.o
+CC	libavcodec/mpegaudiodec_float.o
+CC	libavcodec/mpegaudiodecheader.o
+CC	libavcodec/mpegaudiodsp.o
+CC	libavcodec/mpegaudiodsp_data.o
+CC	libavcodec/mpegaudiodsp_fixed.o
+CC	libavcodec/mpegaudiodsp_float.o
+CC	libavcodec/mpegaudioenc_fixed.o
+CC	libavcodec/mpegaudioenc_float.o
+CC	libavcodec/mpegaudiotabs.o
+CC	libavcodec/mpegpicture.o
+CC	libavcodec/mpegutils.o
+CC	libavcodec/mpegvideo.o
+CC	libavcodec/mpegvideo_dec.o
+CC	libavcodec/mpegvideo_enc.o
+CC	libavcodec/mpegvideo_motion.o
+CC	libavcodec/mpegvideo_parser.o
+CC	libavcodec/mpegvideodata.o
+CC	libavcodec/mpegvideoencdsp.o
+CC	libavcodec/mpl2dec.o
+CC	libavcodec/mqc.o
+CC	libavcodec/mqcdec.o
+CC	libavcodec/mqcenc.o
+CC	libavcodec/msgsmdec.o
+CC	libavcodec/msmpeg4.o
+CC	libavcodec/msmpeg4_vc1_data.o
+CC	libavcodec/msmpeg4data.o
+CC	libavcodec/msmpeg4dec.o
+CC	libavcodec/msmpeg4enc.o
+CC	libavcodec/msp2dec.o
+CC	libavcodec/msrle.o
+CC	libavcodec/msrledec.o
+CC	libavcodec/msrleenc.o
+CC	libavcodec/mss1.o
+CC	libavcodec/mss12.o
+CC	libavcodec/mss2.o
+CC	libavcodec/mss2dsp.o
+CC	libavcodec/mss3.o
+CC	libavcodec/mss34dsp.o
+CC	libavcodec/mss4.o
+CC	libavcodec/msvideo1.o
+CC	libavcodec/msvideo1enc.o
+CC	libavcodec/mv30.o
+CC	libavcodec/mvcdec.o
+CC	libavcodec/mxpegdec.o
+CC	libavcodec/nellymoser.o
+CC	libavcodec/nellymoserdec.o
+CC	libavcodec/nellymoserenc.o
+CC	libavcodec/neon/mpegvideo.o
+CC	libavcodec/notchlc.o
+CC	libavcodec/null.o
+CC	libavcodec/nuv.o
+CC	libavcodec/on2avc.o
+CC	libavcodec/on2avcdata.o
+CC	libavcodec/options.o
+CC	libavcodec/opus_celt.o
+CC	libavcodec/opus_parse.o
+CC	libavcodec/opus_parser.o
+CC	libavcodec/opus_pvq.o
+CC	libavcodec/opus_rc.o
+CC	libavcodec/opus_silk.o
+CC	libavcodec/opusdec.o
+CC	libavcodec/opusdec_celt.o
+CC	libavcodec/opusdsp.o
+CC	libavcodec/opusenc.o
+CC	libavcodec/opusenc_psy.o
+CC	libavcodec/opustab.o
+CC	libavcodec/osq.o
+CC	libavcodec/pafaudio.o
+CC	libavcodec/pafvideo.o
+CC	libavcodec/pamenc.o
+CC	libavcodec/parser.o
+CC	libavcodec/parsers.o
+CC	libavcodec/pcm-bluray.o
+CC	libavcodec/pcm-blurayenc.o
+CC	libavcodec/pcm-dvd.o
+CC	libavcodec/pcm-dvdenc.o
+CC	libavcodec/pcm.o
+CC	libavcodec/pcx.o
+CC	libavcodec/pcxenc.o
+CC	libavcodec/pgssubdec.o
+CC	libavcodec/pgxdec.o
+CC	libavcodec/photocd.o
+CC	libavcodec/pictordec.o
+CC	libavcodec/pixblockdsp.o
+CC	libavcodec/pixlet.o
+CC	libavcodec/png_parser.o
+CC	libavcodec/pnm.o
+CC	libavcodec/pnm_parser.o
+CC	libavcodec/pnmdec.o
+CC	libavcodec/pnmenc.o
+CC	libavcodec/profiles.o
+CC	libavcodec/proresdata.o
+CC	libavcodec/proresdec2.o
+CC	libavcodec/proresdsp.o
+CC	libavcodec/proresenc_anatoliy.o
+CC	libavcodec/proresenc_kostya.o
+CC	libavcodec/prosumer.o
+CC	libavcodec/psd.o
+CC	libavcodec/psymodel.o
+CC	libavcodec/pthread.o
+CC	libavcodec/pthread_frame.o
+CC	libavcodec/pthread_slice.o
+CC	libavcodec/ptx.o
+CC	libavcodec/qcelpdec.o
+CC	libavcodec/qdm2.o
+CC	libavcodec/qdmc.o
+CC	libavcodec/qdrw.o
+CC	libavcodec/qoadec.o
+CC	libavcodec/qoi_parser.o
+CC	libavcodec/qoidec.o
+CC	libavcodec/qoienc.o
+CC	libavcodec/qpeg.o
+CC	libavcodec/qpeldsp.o
+CC	libavcodec/qsv_api.o
+CC	libavcodec/qtrle.o
+CC	libavcodec/qtrleenc.o
+CC	libavcodec/r210dec.o
+CC	libavcodec/r210enc.o
+CC	libavcodec/ra144.o
+CC	libavcodec/ra144dec.o
+CC	libavcodec/ra144enc.o
+CC	libavcodec/ra288.o
+CC	libavcodec/ralf.o
+CC	libavcodec/rangecoder.o
+CC	libavcodec/ratecontrol.o
+CC	libavcodec/raw.o
+CC	libavcodec/rawdec.o
+CC	libavcodec/rawenc.o
+CC	libavcodec/realtextdec.o
+CC	libavcodec/refstruct.o
+CC	libavcodec/rka.o
+CC	libavcodec/rl.o
+CC	libavcodec/rl2.o
+CC	libavcodec/rle.o
+CC	libavcodec/roqaudioenc.o
+CC	libavcodec/roqvideo.o
+CC	libavcodec/roqvideodec.o
+CC	libavcodec/roqvideoenc.o
+CC	libavcodec/rpza.o
+CC	libavcodec/rpzaenc.o
+CC	libavcodec/rtjpeg.o
+CC	libavcodec/rtv1.o
+CC	libavcodec/rv10.o
+CC	libavcodec/rv10enc.o
+CC	libavcodec/rv20enc.o
+CC	libavcodec/rv30.o
+CC	libavcodec/rv30dsp.o
+CC	libavcodec/rv34.o
+CC	libavcodec/rv34_parser.o
+CC	libavcodec/rv34dsp.o
+CC	libavcodec/rv40.o
+CC	libavcodec/rv40dsp.o
+CC	libavcodec/s302m.o
+CC	libavcodec/s302menc.o
+CC	libavcodec/samidec.o
+CC	libavcodec/sanm.o
+CC	libavcodec/sbc.o
+CC	libavcodec/sbc_parser.o
+CC	libavcodec/sbcdec.o
+CC	libavcodec/sbcdec_data.o
+CC	libavcodec/sbcdsp.o
+CC	libavcodec/sbcdsp_data.o
+CC	libavcodec/sbcenc.o
+CC	libavcodec/sbrdsp.o
+CC	libavcodec/sbrdsp_fixed.o
+CC	libavcodec/scpr.o
+CC	libavcodec/sga.o
+CC	libavcodec/sgidec.o
+CC	libavcodec/sgienc.o
+CC	libavcodec/sgirledec.o
+CC	libavcodec/sheervideo.o
+CC	libavcodec/shorten.o
+CC	libavcodec/simple_idct.o
+CC	libavcodec/sinewin.o
+CC	libavcodec/sipr.o
+CC	libavcodec/sipr16k.o
+CC	libavcodec/sipr_parser.o
+CC	libavcodec/siren.o
+CC	libavcodec/smacker.o
+CC	libavcodec/smc.o
+CC	libavcodec/smcenc.o
+CC	libavcodec/snappy.o
+CC	libavcodec/snow.o
+CC	libavcodec/snow_dwt.o
+CC	libavcodec/snowdec.o
+CC	libavcodec/snowenc.o
+CC	libavcodec/sonic.o
+CC	libavcodec/sp5xdec.o
+CC	libavcodec/speedhq.o
+CC	libavcodec/speedhqdec.o
+CC	libavcodec/speedhqenc.o
+CC	libavcodec/speexdec.o
+CC	libavcodec/srtdec.o
+CC	libavcodec/srtenc.o
+CC	libavcodec/startcode.o
+CC	libavcodec/subviewerdec.o
+CC	libavcodec/sunrast.o
+CC	libavcodec/sunrastenc.o
+CC	libavcodec/svq1.o
+CC	libavcodec/svq1dec.o
+CC	libavcodec/svq1enc.o
+CC	libavcodec/svq3.o
+CC	libavcodec/synth_filter.o
+CC	libavcodec/tak.o
+CC	libavcodec/tak_parser.o
+CC	libavcodec/takdec.o
+CC	libavcodec/takdsp.o
+CC	libavcodec/targa.o
+CC	libavcodec/targa_y216dec.o
+CC	libavcodec/targaenc.o
+CC	libavcodec/textdec.o
+CC	libavcodec/texturedsp.o
+CC	libavcodec/texturedspenc.o
+CC	libavcodec/tiertexseqv.o
+CC	libavcodec/tiff.o
+CC	libavcodec/tiff_common.o
+CC	libavcodec/tiffenc.o
+libavcodec/tiff.c: In function 'horizontal_fill':
+libavcodec/tiff.c:424:17: warning: unused variable 'ret' [-Wunused-variable]
+  424 |             int ret = init_get_bits8(&gb, src, width);
+      |                 ^~~
+libavcodec/tiff.c: In function 'unpack_gray':
+libavcodec/tiff.c:459:9: warning: unused variable 'ret' [-Wunused-variable]
+  459 |     int ret = init_get_bits8(&gb, src, width);
+      |         ^~~
+CC	libavcodec/tmv.o
+CC	libavcodec/to_upper4.o
+CC	libavcodec/tpeldsp.o
+CC	libavcodec/truemotion1.o
+CC	libavcodec/truemotion2.o
+CC	libavcodec/truemotion2rt.o
+CC	libavcodec/truespeech.o
+CC	libavcodec/tscc2.o
+CC	libavcodec/tta.o
+CC	libavcodec/ttadata.o
+CC	libavcodec/ttadsp.o
+CC	libavcodec/ttaenc.o
+CC	libavcodec/ttaencdsp.o
+CC	libavcodec/ttmlenc.o
+CC	libavcodec/twinvq.o
+CC	libavcodec/twinvqdec.o
+CC	libavcodec/txd.o
+CC	libavcodec/ulti.o
+CC	libavcodec/utils.o
+CC	libavcodec/utvideodec.o
+CC	libavcodec/utvideodsp.o
+CC	libavcodec/utvideoenc.o
+CC	libavcodec/v210dec.o
+CC	libavcodec/v210enc.o
+CC	libavcodec/v210x.o
+CC	libavcodec/v308dec.o
+CC	libavcodec/v308enc.o
+CC	libavcodec/v408dec.o
+CC	libavcodec/v408enc.o
+CC	libavcodec/v410dec.o
+CC	libavcodec/v410enc.o
+CC	libavcodec/v4l2_buffers.o
+CC	libavcodec/v4l2_context.o
+CC	libavcodec/v4l2_fmt.o
+CC	libavcodec/v4l2_m2m.o
+CC	libavcodec/v4l2_m2m_dec.o
+CC	libavcodec/v4l2_m2m_enc.o
+CC	libavcodec/vb.o
+CC	libavcodec/vble.o
+CC	libavcodec/vbndec.o
+CC	libavcodec/vbnenc.o
+CC	libavcodec/vc1.o
+CC	libavcodec/vc1_block.o
+CC	libavcodec/vc1_loopfilter.o
+CC	libavcodec/vc1_mc.o
+CC	libavcodec/vc1_parser.o
+CC	libavcodec/vc1_pred.o
+CC	libavcodec/vc1data.o
+CC	libavcodec/vc1dec.o
+CC	libavcodec/vc1dsp.o
+CC	libavcodec/vc2enc.o
+CC	libavcodec/vc2enc_dwt.o
+CC	libavcodec/vcr1.o
+CC	libavcodec/version.o
+CC	libavcodec/videodsp.o
+CC	libavcodec/vima.o
+CC	libavcodec/vlc.o
+CC	libavcodec/vmdaudio.o
+CC	libavcodec/vmdvideo.o
+CC	libavcodec/vmixdec.o
+CC	libavcodec/vmnc.o
+CC	libavcodec/vorbis.o
+CC	libavcodec/vorbis_data.o
+CC	libavcodec/vorbis_parser.o
+CC	libavcodec/vorbisdec.o
+In file included from libavcodec/vlc.c:33:
+In function 'add_level',
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'vlc_multi_gen' at libavcodec/vlc.c:508:5,
+    inlined from 'ff_vlc_init_multi_from_lengths' at libavcodec/vlc.c:564:11:
+./libavutil/intreadwrite.h:223:63: warning: array subscript 4 is outside array bounds of 'VLC_MULTI_ELEM[1]' [-Warray-bounds=]
+  223 | #   define AV_WN(s, p, v) ((((union unaligned_##s *) (p))->l) = (v))
+      |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+./libavutil/intreadwrite.h:370:26: note: in expansion of macro 'AV_WN'
+  370 | #   define AV_WN16(p, v) AV_WN(16, p, v)
+      |                          ^~~~~
+libavcodec/vlc.c:443:26: note: in expansion of macro 'AV_WN16'
+  443 |             if (is16bit) AV_WN16(info.val+2*curlevel, sym);
+      |                          ^~~~~~~
+libavcodec/vlc.c: In function 'ff_vlc_init_multi_from_lengths':
+libavcodec/vlc.c:517:5: note: at offset 8 into object 'info' of size 8
+  517 | int ff_vlc_init_multi_from_lengths(VLC *vlc, VLC_MULTI *multi, int nb_bits, int nb_elems,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In function 'add_level',
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'add_level' at libavcodec/vlc.c:457:17,
+    inlined from 'vlc_multi_gen' at libavcodec/vlc.c:508:5,
+    inlined from 'ff_vlc_init_multi_from_lengths' at libavcodec/vlc.c:564:11:
+./libavutil/intreadwrite.h:223:63: warning: array subscript 5 is outside array bounds of 'VLC_MULTI_ELEM[1]' [-Warray-bounds=]
+  223 | #   define AV_WN(s, p, v) ((((union unaligned_##s *) (p))->l) = (v))
+      |                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+./libavutil/intreadwrite.h:370:26: note: in expansion of macro 'AV_WN'
+  370 | #   define AV_WN16(p, v) AV_WN(16, p, v)
+      |                          ^~~~~
+libavcodec/vlc.c:443:26: note: in expansion of macro 'AV_WN16'
+  443 |             if (is16bit) AV_WN16(info.val+2*curlevel, sym);
+      |                          ^~~~~~~
+libavcodec/vlc.c: In function 'ff_vlc_init_multi_from_lengths':
+libavcodec/vlc.c:517:5: note: at offset 10 into object 'info' of size 8
+  517 | int ff_vlc_init_multi_from_lengths(VLC *vlc, VLC_MULTI *multi, int nb_bits, int nb_elems,
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CC	libavcodec/vorbisdsp.o
+CC	libavcodec/vorbisenc.o
+CC	libavcodec/vp3.o
+CC	libavcodec/vp3_parser.o
+CC	libavcodec/vp3dsp.o
+CC	libavcodec/vp5.o
+CC	libavcodec/vp56.o
+CC	libavcodec/vp56data.o
+CC	libavcodec/vp56dsp.o
+CC	libavcodec/vp6.o
+CC	libavcodec/vp6dsp.o
+CC	libavcodec/vp8.o
+CC	libavcodec/vp8_parser.o
+CC	libavcodec/vp8data.o
+CC	libavcodec/vp8dsp.o
+CC	libavcodec/vp9.o
+CC	libavcodec/vp9_parser.o
+CC	libavcodec/vp9block.o
+CC	libavcodec/vp9data.o
+CC	libavcodec/vp9dsp.o
+CC	libavcodec/vp9dsp_10bpp.o
+CC	libavcodec/vp9dsp_12bpp.o
+CC	libavcodec/vp9dsp_8bpp.o
+CC	libavcodec/vp9lpf.o
+CC	libavcodec/vp9mvs.o
+CC	libavcodec/vp9prob.o
+CC	libavcodec/vp9recon.o
+CC	libavcodec/vpx_rac.o
+CC	libavcodec/vqavideo.o
+CC	libavcodec/vqcdec.o
+CC	libavcodec/vvc/vvc_cabac.o
+CC	libavcodec/vvc/vvc_ctu.o
+CC	libavcodec/vvc/vvc_data.o
+CC	libavcodec/vvc/vvc_filter.o
+CC	libavcodec/vvc/vvc_inter.o
+CC	libavcodec/vvc/vvc_intra.o
+CC	libavcodec/vvc/vvc_intra_utils.o
+CC	libavcodec/vvc/vvc_itx_1d.o
+CC	libavcodec/vvc/vvc_mvs.o
+CC	libavcodec/vvc/vvc_ps.o
+CC	libavcodec/vvc/vvc_refs.o
+CC	libavcodec/vvc/vvc_thread.o
+CC	libavcodec/vvc/vvcdec.o
+CC	libavcodec/vvc/vvcdsp.o
+CC	libavcodec/vvc_parser.o
+CC	libavcodec/wavarc.o
+CC	libavcodec/wavpack.o
+CC	libavcodec/wavpackdata.o
+CC	libavcodec/wavpackenc.o
+CC	libavcodec/wbmpdec.o
+CC	libavcodec/wbmpenc.o
+CC	libavcodec/webp.o
+CC	libavcodec/webp_parser.o
+CC	libavcodec/webvttdec.o
+CC	libavcodec/webvttenc.o
+CC	libavcodec/wma.o
+CC	libavcodec/wma_common.o
+CC	libavcodec/wma_freqs.o
+CC	libavcodec/wmadec.o
+CC	libavcodec/wmaenc.o
+CC	libavcodec/wmalosslessdec.o
+CC	libavcodec/wmaprodec.o
+In function 'wma_decode_block',
+    inlined from 'wma_decode_frame' at libavcodec/wmadec.c:803:15:
+libavcodec/wmadec.c:519:30: warning: writing 1 byte into a region of size 0 [-Wstringop-overflow=]
+  519 |         s->channel_coded[ch] = a;
+      |         ~~~~~~~~~~~~~~~~~~~~~^~~
+In file included from libavcodec/wmadec.c:45:
+libavcodec/wma.h: In function 'wma_decode_frame':
+libavcodec/wma.h:112:13: note: at offset 2 into destination object 'channel_coded' of size 2
+  112 |     uint8_t channel_coded[MAX_CHANNELS];    ///< true if channel is coded
+      |             ^~~~~~~~~~~~~
+CC	libavcodec/wmavoice.o
+CC	libavcodec/wmv2.o
+CC	libavcodec/wmv2data.o
+CC	libavcodec/wmv2dec.o
+CC	libavcodec/wmv2dsp.o
+CC	libavcodec/wmv2enc.o
+CC	libavcodec/wnv1.o
+CC	libavcodec/wrapped_avframe.o
+CC	libavcodec/ws-snd1.o
+CC	libavcodec/xan.o
+CC	libavcodec/xbm_parser.o
+CC	libavcodec/xbmdec.o
+CC	libavcodec/xbmenc.o
+CC	libavcodec/xface.o
+CC	libavcodec/xfacedec.o
+CC	libavcodec/xfaceenc.o
+CC	libavcodec/xiph.o
+CC	libavcodec/xl.o
+CC	libavcodec/xma_parser.o
+CC	libavcodec/xpmdec.o
+CC	libavcodec/xsubdec.o
+CC	libavcodec/xsubenc.o
+CC	libavcodec/xvididct.o
+CC	libavcodec/xwd_parser.o
+CC	libavcodec/xwddec.o
+CC	libavcodec/xwdenc.o
+CC	libavcodec/xxan.o
+CC	libavcodec/y41pdec.o
+CC	libavcodec/y41penc.o
+CC	libavcodec/ylc.o
+CC	libavcodec/yop.o
+CC	libavcodec/yuv4dec.o
+CC	libavcodec/yuv4enc.o
+GEN	libavcodec/libavcodec.pc
+CC	libswresample/aarch64/audio_convert_init.o
+AS	libswresample/aarch64/audio_convert_neon.o
+AS	libswresample/aarch64/resample.o
+CC	libswresample/aarch64/resample_init.o
+CC	libswresample/audioconvert.o
+CC	libswresample/dither.o
+CC	libswresample/options.o
+CC	libswresample/rematrix.o
+CC	libswresample/resample.o
+CC	libswresample/resample_dsp.o
+CC	libswresample/swresample.o
+CC	libswresample/swresample_frame.o
+CC	libswresample/version.o
+GEN	libswresample/libswresample.pc
+AS	libswscale/aarch64/hscale.o
+AS	libswscale/aarch64/output.o
+CC	libswscale/aarch64/rgb2rgb.o
+AS	libswscale/aarch64/rgb2rgb_neon.o
+CC	libswscale/aarch64/swscale.o
+CC	libswscale/aarch64/swscale_unscaled.o
+AS	libswscale/aarch64/yuv2rgb_neon.o
+CC	libswscale/alphablend.o
+CC	libswscale/gamma.o
+CC	libswscale/half2float.o
+CC	libswscale/hscale.o
+CC	libswscale/hscale_fast_bilinear.o
+CC	libswscale/input.o
+CC	libswscale/options.o
+CC	libswscale/output.o
+CC	libswscale/rgb2rgb.o
+CC	libswscale/slice.o
+CC	libswscale/swscale_unscaled.o
+CC	libswscale/swscale.o
+CC	libswscale/utils.o
+CC	libswscale/version.o
+CC	libswscale/vscale.o
+CC	libswscale/yuv2rgb.o
+GEN	libswscale/libswscale.pc
+CC	libavutil/aarch64/cpu.o
+CC	libavutil/aarch64/float_dsp_init.o
+AS	libavutil/aarch64/float_dsp_neon.o
+CC	libavutil/aarch64/tx_float_init.o
+AS	libavutil/aarch64/tx_float_neon.o
+CC	libavutil/adler32.o
+CC	libavutil/aes.o
+CC	libavutil/aes_ctr.o
+CC	libavutil/ambient_viewing_environment.o
+CC	libavutil/audio_fifo.o
+CC	libavutil/avsscanf.o
+CC	libavutil/avstring.o
+CC	libavutil/base64.o
+CC	libavutil/blowfish.o
+CC	libavutil/bprint.o
+CC	libavutil/buffer.o
+CC	libavutil/camellia.o
+CC	libavutil/cast5.o
+CC	libavutil/channel_layout.o
+CC	libavutil/cpu.o
+CC	libavutil/crc.o
+CC	libavutil/csp.o
+CC	libavutil/des.o
+CC	libavutil/detection_bbox.o
+CC	libavutil/dict.o
+CC	libavutil/display.o
+CC	libavutil/dovi_meta.o
+CC	libavutil/downmix_info.o
+CC	libavutil/encryption_info.o
+CC	libavutil/error.o
+CC	libavutil/eval.o
+CC	libavutil/executor.o
+CC	libavutil/fifo.o
+CC	libavutil/file.o
+CC	libavutil/file_open.o
+CC	libavutil/film_grain_params.o
+CC	libavutil/fixed_dsp.o
+CC	libavutil/float_dsp.o
+CC	libavutil/frame.o
+CC	libavutil/hash.o
+CC	libavutil/hdr_dynamic_metadata.o
+CC	libavutil/hdr_dynamic_vivid_metadata.o
+CC	libavutil/hmac.o
+CC	libavutil/hwcontext.o
+CC	libavutil/hwcontext_stub.o
+CC	libavutil/iamf.o
+CC	libavutil/imgutils.o
+CC	libavutil/integer.o
+CC	libavutil/intmath.o
+CC	libavutil/lfg.o
+CC	libavutil/lls.o
+CC	libavutil/log.o
+CC	libavutil/log2_tab.o
+CC	libavutil/lzo.o
+CC	libavutil/mastering_display_metadata.o
+CC	libavutil/mathematics.o
+CC	libavutil/md5.o
+CC	libavutil/mem.o
+CC	libavutil/murmur3.o
+CC	libavutil/opt.o
+CC	libavutil/parseutils.o
+CC	libavutil/pixdesc.o
+CC	libavutil/pixelutils.o
+CC	libavutil/random_seed.o
+CC	libavutil/rational.o
+CC	libavutil/rc4.o
+CC	libavutil/reverse.o
+CC	libavutil/ripemd.o
+CC	libavutil/samplefmt.o
+CC	libavutil/sha.o
+CC	libavutil/sha512.o
+CC	libavutil/slicethread.o
+CC	libavutil/spherical.o
+CC	libavutil/stereo3d.o
+CC	libavutil/tea.o
+CC	libavutil/threadmessage.o
+CC	libavutil/time.o
+CC	libavutil/timecode.o
+CC	libavutil/timestamp.o
+CC	libavutil/tree.o
+CC	libavutil/twofish.o
+CC	libavutil/tx.o
+CC	libavutil/tx_double.o
+CC	libavutil/tx_float.o
+CC	libavutil/tx_int32.o
+CC	libavutil/utils.o
+CC	libavutil/uuid.o
+CC	libavutil/version.o
+CC	libavutil/video_enc_params.o
+CC	libavutil/video_hint.o
+CC	libavutil/xga_font_data.o
+CC	libavutil/xtea.o
+GEN	libavutil/libavutil.pc
+CC	fftools/ffmpeg_dec.o
+CC	fftools/ffmpeg_demux.o
+CC	fftools/ffmpeg_enc.o
+CC	fftools/ffmpeg_filter.o
+CC	fftools/ffmpeg_hw.o
+CC	fftools/ffmpeg_mux.o
+CC	fftools/ffmpeg_mux_init.o
+CC	fftools/ffmpeg_opt.o
+CC	fftools/ffmpeg_sched.o
+CC	fftools/objpool.o
+CC	fftools/sync_queue.o
+CC	fftools/thread_queue.o
+CC	fftools/cmdutils.o
+CC	fftools/opt_common.o
+CC	fftools/ffmpeg.o
+CC	fftools/ffprobe.o
+AR	libavdevice/libavdevice.a
+AR	libavfilter/libavfilter.a
+AR	libavformat/libavformat.a
+AR	libswresample/libswresample.a
+AR	libavcodec/libavcodec.a
+AR	libswscale/libswscale.a
+AR	libavutil/libavutil.a
+LD	ffmpeg_g
+STRIP	ffmpeg
+LD	ffprobe_g
+STRIP	ffprobe
++ cat /build/logs/ffmpeg-make.log
++ make install
++ cd /build
++ FFMPEG_BIN=/build/out/bin/ffmpeg
++ echo '===== [4] 产物自检 ====='
+===== [4] 产物自检 =====
++ ls -la /build/out/bin/ffmpeg
+-rwxr-xr-x    1 root     root      19733736 Oct 19 09:17 /build/out/bin/ffmpeg
++ echo '--- [4.1] 版本与许可自报 ---'
+--- [4.1] 版本与许可自报 ---
++ /build/out/bin/ffmpeg -version
++ head -3
+ffmpeg version 7.0.2 Copyright (c) 2000-2024 the FFmpeg developers
+built with gcc 14.2.0 (Alpine 14.2.0)
+configuration: --prefix=/build/out --disable-debug --disable-doc --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --disable-indev=v4l2 --disable-outdev=v4l2 --disable-indev=fbdev --disable-outdev=fbdev --enable-libmp3lame --disable-shared --enable-static --extra-cflags=-I/build/lame/include --extra-ldflags='-static -L/build/lame/lib' --cc=gcc
++ /build/out/bin/ffmpeg -L
++ tail -16
+  libavfilter    10.  1.100 / 10.  1.100
+  libswscale      8.  1.100 /  8.  1.100
+  libswresample   5.  1.100 /  5.  1.100
+ffmpeg is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+ffmpeg is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with ffmpeg; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ /build/out/bin/ffmpeg -L
++ grep -q 'GNU Lesser General Public'
+--- [4.2] GPL/version3/nonfree 关键字检查（必须为 0 项）---
++ echo '--- [4.2] GPL/version3/nonfree 关键字检查（必须为 0 项）---'
++ grep -E 'enable-gpl|enable-version3|enable-nonfree'
++ /build/out/bin/ffmpeg -buildconf
++ echo 'OK：无 GPL/version3/nonfree 配置项'
++ echo '--- [4.3] GPL 组件残留检查（必须为 0 项）---'
+OK：无 GPL/version3/nonfree 配置项
+--- [4.3] GPL 组件残留检查（必须为 0 项）---
++ grep -E 'libx264|libx265|libxvid|vidstab|frei0r|rubberband|libzvbi'
++ /build/out/bin/ffmpeg -encoders
++ echo 'OK：无 GPL 组件残留'
+OK：无 GPL 组件残留
++ echo '--- [4.4] 产物哈希 fail-closed 校验（aarch64）---'--- [4.4] 产物哈希 fail-closed 校验（aarch64）---
+
++ sha256sum /build/out/bin/ffmpeg
++ awk '{print $1}'
++ ACTUAL_SHA256=1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d
++ echo '产物 SHA256: 1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d'
+产物 SHA256: 1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d
++ '[' -z 1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d ]
++ '[' 1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d '!=' 1fae8f6f82ea46fdaff94e8710476eaeabfc2136df06b8ce98250aaa3008801d ]
++ echo 'OK：产物哈希与 aarch64 已验证参考值一致（= 已通过回归验证的同一二进制）'
+OK：产物哈希与 aarch64 已验证参考值一致（= 已通过回归验证的同一二进制）
++ rm -f lame-3.100.tar.gz ffmpeg-7.0.2.tar.xz
++ rm -rf /build/lame-3.100 /build/ffmpeg-7.0.2
++ echo '===== 构建完成：/build/out/bin/ffmpeg ====='
+===== 构建完成：/build/out/bin/ffmpeg =====
