@@ -19,7 +19,7 @@
 | LAME / libmp3lame | 3.100 | LGPL-2.0-or-later | 静态编入 ffmpeg（`--disable-decoder`，不含 mpglib） |
 | musl libc | 1.2.5 | MIT | 静态编入 ffmpeg |
 | Python | 3.12.15 | PSF-2.0 | python:3.12-slim（Debian trixie） |
-| Node.js | 24.22.0 | MIT | 官方 node:24-trixie-slim 镜像（仅复制 node 二进制与 LICENSE） |
+| Node.js | 24.22.1 | MIT | 官方 node:24-trixie-slim 镜像（仅复制 node 二进制与 LICENSE） |
 | NCM API（vendored） | @neteasecloudmusicapienhanced/api 4.36.1 | MIT | node_modules 可读源码（6 项本地修改 P-001～P-006，含日志脱敏与依赖安全升级，见 NOTICES §五） |
 | @unblockneteasemusic/server | 0.28.0 | LGPL-3.0-only | 未修改源码随 node_modules 分发（许可全文随附；运行时未启用） |
 | 基础镜像 | Debian 13 trixie | 各包许可随 `/usr/share/doc/<pkg>/copyright` 分发 | 系统包（义务由 Debian 履行） |

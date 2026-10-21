@@ -74,7 +74,7 @@
 
 ## 五、Node.js 运行时与内置 NCM API
 
-- **Node.js**：官方 `node:24-trixie-slim` 镜像提供的 **24.22.0**（MIT）。镜像仅复制其 `node` 可执行文件与 `LICENSE`（`licenses/Node.js-LICENSE`，2946 行 / 157,609 字节，含 V8、ICU、OpenSSL、zlib 等内嵌组件的许可与版权声明）；npm 与 node 头文件不随镜像分发。
+- **Node.js**：官方 `node:24-trixie-slim` 镜像提供的 **24.22.1**（MIT）。镜像仅复制其 `node` 可执行文件与 `LICENSE`（`licenses/Node.js-LICENSE`，2946 行 / 157,609 字节，含 V8、ICU、OpenSSL、zlib 等内嵌组件的许可与版权声明）；npm 与 node 头文件不随镜像分发。
 - **NCM API**：`@neteasecloudmusicapienhanced/api` **4.36.1**，MIT（`backend/vendor/ncm-api/LICENSE`，Copyright (c) 2013-2022 Binaryify）——许可文本随镜像保留〔法定：MIT 需在副本中保留版权与许可声明〕。该内置副本相对上游 npm 发布包（`4.36.1`）含以下本地修改，逐项登记与上游升级重放步骤见源码树内 `backend/vendor/ncm-api/VENDOR-PATCHES.md`（该文件不随镜像分发）：
   1. **P-001 日志白名单化**：新增 `util/log-redact.js`；修改 `server.js`、`util/request.js`、`generateConfig.js`，使请求日志只记录方法与不含查询串的路径，错误日志只输出白名单字段，不输出 Cookie、查询串与响应体；
   2. **P-002 初始化稳健性**：`generateConfig.js` 调整 xeapi 公钥与匿名注册的执行顺序并复用 deviceId；`module/register_anonimous.js` 复用同一 deviceId；`module/login_qr_check.js` 在扫码检查返回异常结构时降级为固定错误码与空 cookie；

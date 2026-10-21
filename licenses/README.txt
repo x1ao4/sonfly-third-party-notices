@@ -30,10 +30,10 @@ musl-COPYRIGHT
 
 Node.js-LICENSE
     来源：官方 node:24-trixie-slim 镜像（index digest:
-    sha256:7f486cabe892bff8fef04c0f7da8dba84a560be3e4e2740b7a86afc57ebec315）内的
-    /usr/local/LICENSE；与 nodejs.org 发布的 node-v24.22.0-linux-x64.tar.xz 内
+    sha256:1375326a10579cc1fd089d5da149ad29ae76dc3ccee6c0b0746d3de09dc5d0a1）内的
+    /usr/local/LICENSE；与 nodejs.org 发布的 node-v24.22.1-linux-x64.tar.xz 内
     LICENSE 逐字节一致（发行包经 SHASUMS256.txt 校验，归档 SHA256:
-    cc2f601cee82d9a5a233302fe307abc600727035fd7d2c3a3571755989e95008）
+    6c172a9ab6718f7b801fb5a7bd486af2ee5e32758086a04b84fcce2aa77095e6）
     本文件 SHA256: 5888dbb9a1d2b18f2c3e6c5f6af1b39de658372b402a0577b002777f14c62ace
     （2946 行 / 157,609 字节：Node.js MIT 正文，并含 V8、ICU、OpenSSL、zlib 等
     内嵌组件的许可与版权声明；镜像内 Node 运行时由该官方二进制提供）
