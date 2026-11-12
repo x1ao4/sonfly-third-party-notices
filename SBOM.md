@@ -1,11 +1,12 @@
 # SBOM —— Sonfly 软件物料清单
 
-- **对应发行物**：Sonfly 发行镜像（应用版本见仓库根 `VERSION`）。
+- **对应发行物**：Sonfly 发行镜像 **1.1.0**（版本以镜像内 `/app/VERSION` 与镜像标签 `org.opencontainers.image.version` 为准）。本清单随组件集合变更更新：组件集合未变更的后续发行物沿用本清单，不逐版重发。
 - **数据来源**：
   - Python：`backend/requirements.lock`（pip-compile --generate-hashes 逐包哈希锁定）逐包解析；
   - Node.js：`backend/vendor/ncm-api/package-lock.json` 生产安装路径逐条解析 × **镜像内 `node_modules` 逐包 `package.json` 实测**；
   - 前端：`frontend/package-lock.json` 运行时依赖；
   - FFmpeg / LAME / musl / UnblockNeteaseMusic：见 [`notices/THIRD-PARTY-NOTICES.md`](notices/THIRD-PARTY-NOTICES.md)（§一~§三、§五）与 [`sources/`](sources/)（源码归档与哈希）。
+  - **路径说明**：以上及各表引用的 `backend/`、`frontend/` 路径均为 Sonfly 项目构建树中的相对路径，仅用于说明本清单的数据来源与构建依据，不表示该文件随发行镜像或本材料仓库分发。实际情形：`backend/requirements.lock`、`frontend/package-lock.json` 不在发行镜像内；`backend/vendor/ncm-api/package-lock.json` 随内置 NCM API 副本整体复制，存在于镜像内 `/app/backend/vendor/ncm-api/package-lock.json`。
 - **统计口径**：Python 36 包（直接 13 + 传递 23，依 `requirements.lock` 的 `# via` 标注）；npm 生产安装路径 249 条（顶层 180 + 嵌套 69）；前端运行时依赖 4。`package-lock.json`（v3）不记录 license 字段，npm 许可分类**以镜像内随包 `package.json` / `LICENSE` 实测为准**（非 lockfile 推断）。
 - **vendored 依赖偏离说明（Sonfly 本地修改）**：上游 `@neteasecloudmusicapienhanced/api@4.36.1` 在其 `package.json` 中声明了 `gzip@^0.1.0` 依赖，但该包为 0 字节空实现且整个依赖树无任何 `require('gzip')` 引用；Sonfly 已在本地修改中将其移除，并相应重生成 `package-lock.json`（见下文 §3.1 说明）。另于 2026-10-18 完成依赖安全升级（`axios` 1.20.0 / `express` 5.3.0 / `music-metadata` 11.16.1；`qs` 经 `overrides` 统一为 6.16.1），详见 NOTICES §五 与 `VENDOR-PATCHES` P-006。
 - 本清单与 [`notices/THIRD-PARTY-NOTICES.md`](notices/THIRD-PARTY-NOTICES.md) 配套：NOTICES 给出许可分类与义务说明，本文件给出逐包明细。
@@ -14,13 +15,13 @@
 
 | 组件 | 版本 | 许可 | 形态 |
 |---|---|---|---|
-| Sonfly 应用本体 | 1.0.0（应用版本，仓库 `VERSION`） | 专有（闭源） | 镜像内 Python 编译产物（仅 .pyc） |
+| Sonfly 应用本体 | 1.1.0（镜像内 `/app/VERSION`） | 专有（闭源） | 镜像内 Python 编译产物（仅 .pyc） |
 | FFmpeg | 7.0.2 | LGPL-2.1-or-later | 静态构建二进制（含 LAME / musl，见 §二~§四） |
 | LAME / libmp3lame | 3.100 | LGPL-2.0-or-later | 静态编入 ffmpeg（`--disable-decoder`，不含 mpglib） |
 | musl libc | 1.2.5 | MIT | 静态编入 ffmpeg |
 | Python | 3.12.15 | PSF-2.0 | python:3.12-slim（Debian trixie） |
 | Node.js | 24.22.1 | MIT | 官方 node:24-trixie-slim 镜像（仅复制 node 二进制与 LICENSE） |
-| NCM API（vendored） | @neteasecloudmusicapienhanced/api 4.36.1 | MIT | node_modules 可读源码（6 项本地修改 P-001～P-006，含日志脱敏与依赖安全升级，见 NOTICES §五） |
+| NCM API（vendored） | @neteasecloudmusicapienhanced/api 4.36.1 | MIT | node_modules 可读源码（8 项本地修改 P-001～P-008，含日志脱敏、依赖安全升级与 3 个新增只读端点，见 NOTICES §五） |
 | @unblockneteasemusic/server | 0.28.0 | LGPL-3.0-only | 未修改源码随 node_modules 分发（许可全文随附；运行时未启用） |
 | 基础镜像 | Debian 13 trixie | 各包许可随 `/usr/share/doc/<pkg>/copyright` 分发 | 系统包（义务由 Debian 履行） |
 

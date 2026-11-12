@@ -59,7 +59,7 @@
 ## 四、Python 运行时与依赖（36 包）
 
 - Python 3.12：PSF License Version 2（`python:3.12-slim`，Debian trixie）。
-- 依赖清单（声明见 `backend/requirements.txt`；全量版本与产物哈希以 `pip-compile --generate-hashes` 生成的 `backend/requirements.lock` 锁定；逐包明细见公开发布的材料仓库中的 `SBOM.md`）：
+- 依赖清单（声明见 `backend/requirements.txt`；全量版本与产物哈希以 `pip-compile --generate-hashes` 生成的 `backend/requirements.lock` 锁定；逐包明细见公开发布的材料仓库中的 `SBOM.md`；`backend/requirements.txt` 与 `backend/requirements.lock` 均为构建树路径，不随镜像分发）：
 
 | 许可证 | 包 |
 |---|---|
@@ -82,6 +82,8 @@
   4. **P-004 入口包装**：新增 `index.js`、`index.mjs`（各 1 行，仅转发至 `app.js`；镜像启动使用 `app.js`，二者未被调用）；
   5. **P-005 依赖清单调整**：移除上游声明但未使用的 `gzip` 依赖（0.1.0），并生成 `package-lock.json` 固定依赖树；上游 `package.json` 的 `scripts` 段仅调整位置，内容未变；
   6. **P-006 依赖安全升级**：`axios` 1.20.0、`express` 5.3.0、`music-metadata` 11.16.1；通过 `overrides` 将 `qs` 统一到 6.16.1，并随依赖解析更新 `socks` 2.8.10、`ip-address` 10.7.4、嵌套 `body-parser` 1.20.8 等；`node-forge`、`basic-ftp` 因无修复版本或上游约束且当前调用路径不可达，保留原版本并记录。
+  7. **P-007 新增端点**：新增 `module/djradio_byuser.js`（`/djradio/byuser`，主播创建的电台列表查询，供主播详情功能调用）；上游 4.36.1 无此模块，为只读查询端点，不修改任何既有请求构造。
+  8. **P-008 新增端点**：新增 `module/social_my_created_voicelist.js`、`module/social_my_subscribed_voicelist.js`（`/social/my/created/voicelist`、`/social/my/subscribed/voicelist`，当前账号创建 / 收藏的播客列表查询，供「我的播客」功能调用）；上游 4.36.1 无此模块，为只读查询端点，不修改任何既有请求构造。
 
   以上修改均不涉及许可文本与版权声明的变更。
 
@@ -112,7 +114,7 @@
 
 ## 六、前端构建产物
 
-- 运行时依赖（全部 MIT；锁定版本以 `frontend/package-lock.json` 为准）：
+- 运行时依赖（全部 MIT；锁定版本以 `frontend/package-lock.json` 为准，该文件为构建树路径，不随镜像分发）：
 
 | 包 | 版本 | 版权主体 | 许可全文（同目录 `licenses/`） |
 |---|---|---|---|

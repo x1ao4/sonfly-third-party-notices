@@ -24,10 +24,10 @@ c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4  ./licenses/ope
 c28c45e3032163e9184b0ed269fdc60ddf5607f44deb85e854f91c5e438090fe  ./licenses/SPDX-MIT-REFERENCE.txt
 3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986  ./licenses/UnblockNeteaseMusic-COPYING-GPL-3.0
 da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768  ./licenses/UnblockNeteaseMusic-COPYING.LESSER-LGPL-3.0
-0818c0d6d3ad89013d7fb1988e6c5d30e42fa1b937063eefd4575c782eff2132  ./notices/THIRD-PARTY-NOTICES.md
+fe8c205f6da9da8a027cb3bc15ddbf5a131bb13ecb0027c8d2063ee59eb7021c  ./notices/THIRD-PARTY-NOTICES.md
 6a6e8a271833116a8e2a7b568e8f9ef7cc644bfb4eaa49ddca36553dfddb03ab  ./README.md
 ca347005f8cbd42a61a9562787e6d01618c698b278cd3f6e1d5c30275460ccd7  ./RELINKING.md
-1a8c11fcdff8b9e37faefbc30464e807d2d3ec9b4afc265b170ce0fbc8c39acc  ./SBOM.md
+93f04fd743a3059cf9ecf7a7db70fcf989641387b69b2425f3d14d45aab075ef  ./SBOM.md
 8646515b638a3ad303e23af6a3587734447cb8fc0a0c064ecdb8e95c4fd8b389  ./sources/ffmpeg-7.0.2.tar.xz
 dddf7541a682f661b121096ebd0e9080b04afe7057ea50113479a02c13ca062c  ./sources/ffmpeg-7.0.2.tar.xz.asc
 590b1fb70181c56d37692fe3b2c498d6d07b91f42f3cfaf736b86e88f2eba74d  ./sources/keys/ffmpeg-release-key.asc
